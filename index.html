@@ -510,6 +510,36 @@ box-sizing: border-box;
   text-align: center;
   margin-top: 10px;
 }
+/* 直向手機版：底部一行（左：Stick；右：錯字） */
+.mobile-bottom {
+  display: none;           /* 預設關閉，只在直向手機開 */
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+@media (orientation: portrait) and (max-width: 820px) {
+  /* 打開底部一行 */
+  .mobile-bottom { display: flex; }
+
+  /* 左邊 Stick、右邊錯字各佔一半 */
+  .mobile-bottom #stick-container { flex: 1 1 50%; }
+  .mobile-bottom #attemptBox      { flex: 1 1 50%; }
+
+  /* 手機直向：鍵盤改為每行 9 粒 */
+  /* 這裡只作保底，JS 亦會在移動時 set 'repeat(9,1fr)' */
+  .keyboard {
+    display: grid !important;
+    grid-template-columns: repeat(9, 1fr) !important;
+    gap: 6px;
+    width: 100% !important;
+  }
+
+  .keyboard button {
+    height: 42px;
+    font-size: 18px;
+  }
+}
 
 
 #wordImage{
@@ -565,6 +595,12 @@ box-sizing: border-box;
   <div class="input-container" id="inputContainer">
     <input type="text" id="inputBox" readonly />
     <div id="scorePopup">+10</div>
+<!-- 手機直向：鍵盤插槽（輸入欄下） -->
+<div id="mobileKeyboardSlot"></div>
+
+<!-- 手機直向：Stick + 錯字（鍵盤下方一行：左/右） -->
+<div id="mobileBottomRow" class="mobile-bottom"></div>
+
   </div>
 
 </div>
@@ -1784,6 +1820,90 @@ function resetInput(length) {
     initGame();
 switchSet(1); 
 
-  </script>
+  let originalSpots = null;
+
+function isPortraitPhone() {
+  return window.innerWidth <= 820 && window.innerHeight > window.innerWidth;
+}
+
+function rememberOriginalSpots() {
+  if (originalSpots) return; // 只記一次
+  const leftPanel     = document.querySelector('.left-panel');
+  const stickWrap     = document.getElementById('stick-container');
+  const attemptBox    = document.getElementById('attemptBox');
+  originalSpots = {
+    leftParent:   leftPanel.parentNode,
+    leftNext:     leftPanel.nextSibling,
+    stickParent:  stickWrap.parentNode,
+    stickNext:    stickWrap.nextSibling,
+    attemptParent:attemptBox.parentNode,
+    attemptNext:  attemptBox.nextSibling
+  };
+}
+
+function moveToMobile() {
+  const leftPanel   = document.querySelector('.left-panel');
+  const kbSlot      = document.getElementById('mobileKeyboardSlot');
+  const bottomRow   = document.getElementById('mobileBottomRow');
+  const stickWrap   = document.getElementById('stick-container');
+  const attemptBox  = document.getElementById('attemptBox');
+
+  if (!leftPanel || !kbSlot || !bottomRow || !stickWrap || !attemptBox) return;
+
+  // 1) 鍵盤搬到輸入欄下（保留左欄內的 Lesson / Play 亦一齊搬）
+  kbSlot.appendChild(leftPanel);
+
+  // 2) Stick + 錯字 → 放到底部一行（左／右）
+  bottomRow.appendChild(stickWrap);
+  bottomRow.appendChild(attemptBox);
+
+  // 3) 調整鍵盤每行 9 粒
+  document.querySelectorAll('.keyboard').forEach(kb => {
+    kb.style.display = 'grid';
+    kb.style.gridTemplateColumns = 'repeat(9, 1fr)';
+    kb.style.gap = '6px';
+    kb.style.width = '100%';
+  });
+}
+
+function moveBackToDesktop() {
+  if (!originalSpots) return;
+
+  const leftPanel  = document.querySelector('.left-panel');
+  const stickWrap  = document.getElementById('stick-container');
+  const attemptBox = document.getElementById('attemptBox');
+
+  // 放回原位（照原本的兄弟節點插回）
+  const {
+    leftParent, leftNext,
+    stickParent, stickNext,
+    attemptParent, attemptNext
+  } = originalSpots;
+
+  if (leftParent)   leftParent.insertBefore(leftPanel,   leftNext);
+  if (stickParent)  stickParent.insertBefore(stickWrap,  stickNext);
+  if (attemptParent)attemptParent.insertBefore(attemptBox, attemptNext);
+
+  // 還原鍵盤列數（回 3 列）
+  document.querySelectorAll('.keyboard').forEach(kb => {
+    kb.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    kb.style.width = '192px';
+  });
+}
+
+function layoutByOrientation() {
+  rememberOriginalSpots();
+  if (isPortraitPhone()) {
+    moveToMobile();
+  } else {
+    moveBackToDesktop();
+  }
+}
+
+// 初始及變更時執行
+window.addEventListener('load', layoutByOrientation);
+window.addEventListener('resize', layoutByOrientation);
+window.addEventListener('orientationchange', layoutByOrientation);
+</script>
 </body>
 </html>

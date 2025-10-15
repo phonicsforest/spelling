@@ -22,18 +22,17 @@
       background-repeat: no-repeat;
     }
 
-    .container {
-      transform-origin: top left;
-      width: 1000px;
-      height: 720px;
-      transform: scale(1);
-    }
-
-    .game-row {
-      display: flex;
-      gap: 20px;
-    }
-
+.container{
+  width: min(1000px, 100vw);
+  margin: 0 auto;
+  padding: 10px;
+}
+.game-row{
+  display: grid;
+  grid-template-columns: 192px 1fr 300px;
+  gap: 16px;
+  align-items: start;
+}
     .left-panel {
       width: 192px;
     }
@@ -56,42 +55,34 @@
       font-weight: normal;
     }
 
-    .keyboard {
-      display: flex;
-      flex-wrap: wrap;
-      width: 192px;
-    }
-
-    .keyboard button {
-      width: 60px;
-      height: 60px;
-      margin: 2px;
-      font-size: 24px;
-      background-color: #8B4513;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    .keyboard button.backspace {
-      background-color: #f4c542;
-      color: #8B4513;
-    }
-
-    .keyboard button:hover {
-      background-color: #3a1f00;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-
-.keyboard button.key-disabled {
-   background-color: #d2a679 !important;
-  cursor: not-allowed;
+  .keyboard{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px 6px;
+  width: 192px;               /* 保持左欄原寬 */
 }
-.keyboard button.key-disabled:hover {
-  box-shadow: none;
-  background-color: #d2a679 !important;
+.keyboard button{
+  width: 100%;
+  height: 60px;
+  font-size: 24px;
+  background-color: #8B4513;  /* 啡底 */
+  color: #fff;                /* 白字 */
+  border: none;
+  cursor: pointer;
 }
-
+.keyboard button:hover{
+  background-color:#3a1f00;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.keyboard button.backspace{
+  background-color:#f4c542;
+  color:#8B4513;
+}
+.keyboard button.key-disabled{
+  background-color:#d2a679 !important;
+  cursor:not-allowed;
+}
+.keyboard button.key-disabled:hover{ box-shadow:none }
 
     .image-input-wrapper {
       display: flex;
@@ -100,11 +91,12 @@
       margin-top: 74px;
     }
 
-    .image-container {
-      width: 570px;
-      height: 390px;
-      position: relative;
-    }
+.image-container{
+  position: relative;
+  width: 570px;              /* 桌面同你原尺寸一致 */
+  height: 390px;
+} 
+
 .word-hint{
   position: absolute;
   left: 10px;
@@ -113,40 +105,26 @@
   color: #8B4513;
   font-size: 22px;
   line-height: 1.1;
-  background: rgba(255,255,255,0);  /* 透明 */
+  background: rgba(255,255,255,0);  /* 透明疊上圖 */
   pointer-events: none;
   z-index: 2;
 }
-
-
-    #wordImage {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-
+#wordImage{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
 #wordImage.placeholder{
   background:#fff;
 }
-    #soundBtn {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      background: none;
-      border: none;
-      padding: 0;
-      cursor: pointer;
-    }
-
-    #soundBtn img {
-      width: 50px;
-      height: auto;
-transition: filter 0.25s ease;
-    }
-#soundBtn:hover img {
-  filter: brightness(1.2); /* 提亮 20% */
+#soundBtn{
+  position:absolute; right:10px; bottom:10px;
+  background:none; border:none; padding:0; cursor:pointer; z-index:3;
 }
+#soundBtn img{ width:50px; height:auto; transition:filter .25s ease; }
+#soundBtn:hover img{ filter:brightness(1.2); }
+#soundBtn[disabled]{ opacity:.4; pointer-events:none; }
+
 /* 讓 stick 可以縮放 */
 #stick {
   width: 300px;
@@ -214,11 +192,15 @@ transition: filter 0.25s ease;
 }
 
 
-    .input-container {
-      width: 570px;
-      position: relative;
-  text-align: center; /* 加呢句令所有內容（包括多格）置中 */
-    }
+ .input-container{ width: 100%; }
+
+#submitBtn{
+  width:auto !important;               /* 直接覆蓋先前 100% 設定 */
+  display:inline-block;
+  padding:10px 22px;                   /* 比文字闊少少 */
+  font-size:20px; background:#20B2AA; color:#fff; border:none;
+  transition:background-color .25s ease, transform .1s ease;
+}
 
 #lessonLabel {
   font-size: 24px;
@@ -266,23 +248,17 @@ box-sizing: border-box;
       position: relative;
       transition: background-color 0.25s ease;
     }
-#submitBtn:hover {
-  background-color: #008080;   /* 深啡綠藍色 → 對比強 */
-  transform: scale(1.05);      /* 微微放大 */
-  box-shadow: 0 0 10px rgba(0, 128, 128, 0.6); /* 加光暈 */
-}
+#submitBtn:hover{ background:#008080; transform:translateY(-1px); box-shadow:0 0 10px rgba(0,128,128,.6); }
     #stick-container {
       text-align: center;
       margin-top: 74px;
     }
 
-    #stick {
-      width: 300px;
-      height: 470px;
-margin-top: 0;      /* 確保 stick 頂緣貼住 container */
-  transform-origin: top center;
-      margin-top: 10px;
-    }
+    /* stick 縮細 */
+  #stick{
+    width: min(70vw, 320px);
+    height: auto;
+  }
 
     #scoreDisplay {
       color: #8B4513;
@@ -305,16 +281,21 @@ margin-top: 0;      /* 確保 stick 頂緣貼住 container */
       animation: floatUp 1.2s ease-out forwards;
     }
 
+@media (max-width:900px){
+  #playBtn{ position:static; width:72px; height:72px; margin-left:8px; }
+  .image-container{ width:100%; height:auto; aspect-ratio:19/13; }
+}
+  .left-panel,
+  .image-input-wrapper,
+  #stick-container{
+    width: 100%;
+  }
+
     @keyframes floatUp {
       0% { opacity: 1; transform: translateY(0); }
       100% { opacity: 0; transform: translateY(-120px); }
     }
 
-    @media screen and (max-width: 1000px) {
-      .container {
-        transform: scale(calc(100vw / 1000));
-      }
-    }
 
     #gameOverOverlay {
       position: fixed;
@@ -425,84 +406,94 @@ margin-top: 0;      /* 確保 stick 頂緣貼住 container */
 
 
 /* 1) 全畫面 90% 啡色遮罩 */
-#hintOverlay{
+#hintOverlay {
   position: fixed;
   inset: 0;
-  display: none;                 /* 需要時用 showHint() 開 */
+  display: none;
   align-items: center;
   justify-content: center;
-  z-index: 1500;                 /* 高過晒其他嘢（除 set 選單外） */
-  background: rgba(139, 69, 19, 0.8);  /* 90% 啡色 */
-  pointer-events: auto;          /* 攔截點擊 */
+  background: rgba(139, 69, 19, 0.85);
+  z-index: 3000;
 }
-
-/* 2) hints.png 大 2 倍（同時保持唔爆窗） */
-.hint-card{
-  position: relative;
- width: 800px;   /* 由640px縮細到400px */
-  max-width: 90vw;
-  aspect-ratio: 4 / 3;
+.hint-card {
+  position: relative;                /* 子層用佢定位 */
+  width: min(95vw, 900px);
+  aspect-ratio: 16 / 6;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 3100;
 }
-
-/* 3) 提示文字「重疊」喺 hints.png 上（唔係圖片上方以外位置） */
-#hintText{
+#hintText {
   position: absolute;
-  //top: 10%;                      /* 圖上方區域（仍然係重疊於圖上） */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 88%;
-  color: rgb(139, 69, 19);                   /* 啡色背景下白字更清晰 */
-  -webkit-text-stroke: 0.5px rgba(0,0,0,0.25);
-  font-size: clamp(10px, 2.2vw,25px);
-  line-height: 1.35;
-  text-align: center;
-  z-index: 2;                    /* 一定喺圖之上 */
+  top: 50%;                        /* 垂直中心 */
+  left: 50%;                       /* 水平中心 */
+  transform: translate(-50%, -50%);/* 同時校正中心點 */
+  width: 80%;                      /* 文字區域寬度（可調） */
+  text-align: center;              /* 文字水平置中 */
+  color: #5a3e2b;                  /* 啡色字 */
+  font-size: clamp(18px, 2.6vw, 28px);
+  line-height: 1.5;
+  z-index: 2;                      /* 顯示在 hints.png 上 */
+  -webkit-text-stroke: 0;
 }
 
 /* 4) 兩個按鈕細一倍、同樣重疊在圖上、偏低位置 */
-.hint-actions{
+.hint-actions {
   position: absolute;
-  left: 6%;
-  transform: translateX(-45%);
-  bottom: 40%;                    /* 偏下 */
-  display: flex;
-  gap: 24px;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;                    /* 在圖上面 */
+  left: 25px;
+  bottom: 90px;
+  z-index: 3;               /* 最高層 */
 }
 
-.hint-btn{
+#soundBtn[disabled] { opacity: .4; pointer-events: none; }
+
+.hint-btn {
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
 }
 
-.hint-btn img{
-  width: 28px;                   /* 由 72px → 36px（細 1 倍） */
+.hint-btn img {
+  display: block;
+  width: 40px;
   height: auto;
-filter: drop-shadow(0 0 2px rgba(0,0,0,0.3));
-transition: filter 0.25s ease;
-}
-.hint-btn:hover img {
-  transform: rotate(90deg) scale(1.2);  
- filter: brightness(1.2); /* 提亮 20% */
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.5));
+  transition: transform 0.2s ease;
 }
 
-/* 圖片本身保持填滿卡片 */
-.hint-bg{
+.hint-btn:hover img {
+  transform: scale(1.1);
+}
+
+.hint-btn.fallback-x::before{
+  content:"✕";
+  font-size:46px;
+  line-height:1;
+  color:#8B4513;          /* 深啡色 */
+  text-shadow: 0 0 2px rgba(0,0,0,.35);
+}
+
+
+.hint-bg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
-  z-index: 1;                    /* 圖層喺文字、按鈕之下 */
+  z-index: 1;               /* 最底層 */
+  display: block;
+  pointer-events: none;     /* 保證 cross 可點擊 */
 }
-.image-container { position: relative; width: 570px; height: 390px; }
+
+
+
+.image-container { position: relative; }
 
 #blankImage{
   position:absolute;
@@ -532,41 +523,17 @@ transition: filter 0.25s ease;
   font-weight: bold;
   color: #5a3e2b;
 }
-.label-row {
-  position: relative; /* 讓 Play 的 absolute 定位參考這裡 */
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  margin-bottom: 8px;
+.label-row{ position: relative; display:flex; align-items:center; gap:8px; }
+#playBtn{
+  position:absolute; right:-60px; top:20px;
+  width:90px; height:90px; border-radius:50%;
+  background: linear-gradient(135deg,#ff9f1c,#ff3b30);
+  color:#fff; font-size:26px; font-weight:700;
+  border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition: transform .15s ease, filter .2s ease; z-index:2000; box-shadow:none;
 }
-
-#playBtn {
-  position: absolute;
-  right: -60px;           /* 向右移一點，視覺上貼住 Lesson */
-  top: 20px;                 /* 與 Lesson 標題平齊 */
-  width: 90px;            /* 比之前再大 30% */
-  height: 90px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ff9f1c, #ff3b30); /* 橙→紅 */
-  color: #fff;
-  font-size: 26px;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.15s ease, filter 0.2s ease;
-  z-index: 2000;          /* 高於其他元件 */
-  box-shadow: none;       /* 不要 shadow */
-}
-
-#playBtn:hover {
-  transform: scale(1.05);
-  filter: brightness(1.1);
-}
-
+#playBtn:hover{ transform:scale(1.05); filter:brightness(1.1); }
+/* 手機時改回不蓋住標題 */
 
 
 
@@ -638,11 +605,8 @@ transition: filter 0.25s ease;
       </button>
     </div>
   </div>
-  <!-- 專用提示聲 audio -->
   <audio id="hintAudio"></audio>
 </div>
-
-
 <!-- 專用來播提示音的 audio（不影響你本來的 #audio） -->
 
 
@@ -1052,6 +1016,9 @@ currentSet = null;
 // 調低「錯誤刮聲」音量（0~1）
 const miss = document.getElementById('missSound');
 if (miss) miss.volume = 0.25;   // 例如 25% 音量
+// 🔒 未 Play 前禁用 Speaker（視覺上也禁用）
+  const sp = document.getElementById('soundBtn');
+  if (sp) sp.disabled = true;
 }
 
     function createButton(char) {
@@ -1680,19 +1647,17 @@ function applyDisabledLetters(letters=[]) {
   });
 }
 
-function handlePlay() {
-  // 如果仲未載任何 set，就預設 Lesson 1
+function handlePlay(){
   if (!currentSet) switchSet(1);
-
-  // 解鎖：往後自動顯示/播放 hint
   firstPlayRequired = false;
-playStarted = true; // ✅ 啟動輸入和聲音
+  playStarted = true;
 
-  // 隱藏 Play 鍵（只用一次）
   const btn = document.getElementById('playBtn');
   if (btn) btn.style.display = 'none';
 
-  // 第一題如有 hint，立即顯示並播放
+  const sp = document.getElementById('soundBtn');
+  if (sp) sp.disabled = false;
+
   const obj = wordSets[currentSet]?.[currentIndex];
   if (obj?.hint) showHint(obj.hint);
 }

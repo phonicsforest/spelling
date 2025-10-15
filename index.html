@@ -565,6 +565,48 @@ box-sizing: border-box;
 #playBtn:hover{ transform:scale(1.05); filter:brightness(1.1); }
 /* 手機時改回不蓋住標題 */
 
+/* 背景鋪滿，不留白（行動裝置高度正確） */
+html, body { height: 100%; }
+body{
+  min-height: 100svh;
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
+
+/* 手機直向：單欄、left-panel 搬落去輸入欄下面，Stick+錯字在更下面（左右） */
+@media (orientation: portrait) and (max-width: 820px){
+  .game-row{ grid-template-columns: 1fr; }
+
+  /* left-panel 在手機直向填滿闊度 */
+  .left-panel{ width: 100% !important; }
+
+  /* left-panel 入面兩個 keyboard 改為 9 粒一行，自動分 3–4 行 */
+  .left-panel .keyboard{
+    display: grid !important;
+    grid-template-columns: repeat(9, 1fr) !important;
+    gap: 6px;
+    width: 100% !important;
+  }
+  .left-panel .keyboard button{
+    height: 44px;
+    font-size: 18px;
+  }
+
+  /* Stick + 錯字：鍵盤之下，左右排列 */
+  .mobile-bottom{
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .mobile-bottom #stick-container{ flex: 1 1 50%; }
+  .mobile-bottom #attemptBox{      flex: 1 1 50%; }
+
+  /* 圖片區少少上邊距收緊 */
+  .image-input-wrapper{ margin-top: 10px; }
+}
+
 
 
   </style>
@@ -577,7 +619,7 @@ box-sizing: border-box;
   <div id="lessonLabel">Lesson 7-1</div>
   <button id="playBtn" onclick="handlePlay()">Play</button>
 </div>
-  <div class="label">ConsonantsCCCC</div>
+  <div class="label">ConsonantsAA</div>
         <div class="keyboard" id="consonantKeys"></div>
         <div class="label">Vowels</div>
         <div class="keyboard" id="vowelKeys"></div>
@@ -612,6 +654,13 @@ box-sizing: border-box;
 
 <button id="submitBtn" onclick="submitAnswer()">submit</button>
       </div>
+
+<!-- 手機直向：整個 left-panel 會搬到呢個位置 -->
+<div id="mobileLeftPanelSlot"></div>
+
+<!-- 手機直向：Stick + 錯字（鍵盤之下：左／右） -->
+<div id="mobileBottomRow" class="mobile-bottom"></div>
+
 
       <div id="stick-container">
 
@@ -1825,193 +1874,72 @@ function resetInput(length) {
     initGame();
 switchSet(1); 
 
-  let originalSpots = null;
-
-function isPortraitPhone() {
-  return window.innerWidth <= 820 && window.innerHeight > window.innerWidth;
-}
-
-function rememberOriginalSpots() {
-  if (originalSpots) return; // 只記一次
-  const leftPanel     = document.querySelector('.left-panel');
-  const stickWrap     = document.getElementById('stick-container');
-  const attemptBox    = document.getElementById('attemptBox');
-  originalSpots = {
-    leftParent:   leftPanel.parentNode,
-    leftNext:     leftPanel.nextSibling,
-    stickParent:  stickWrap.parentNode,
-    stickNext:    stickWrap.nextSibling,
-    attemptParent:attemptBox.parentNode,
-    attemptNext:  attemptBox.nextSibling
-  };
-}
-
-function moveToMobile() {
-  const leftPanel   = document.querySelector('.left-panel');
-  const kbSlot      = document.getElementById('mobileKeyboardSlot');
-  const bottomRow   = document.getElementById('mobileBottomRow');
-  const stickWrap   = document.getElementById('stick-container');
-  const attemptBox  = document.getElementById('attemptBox');
-
-  if (!leftPanel || !kbSlot || !bottomRow || !stickWrap || !attemptBox) return;
-
-  // 1) 鍵盤搬到輸入欄下（保留左欄內的 Lesson / Play 亦一齊搬）
-  kbSlot.appendChild(leftPanel);
-
-  // 2) Stick + 錯字 → 放到底部一行（左／右）
-  bottomRow.appendChild(stickWrap);
-  bottomRow.appendChild(attemptBox);
-
-  // 3) 調整鍵盤每行 9 粒
-  document.querySelectorAll('.keyboard').forEach(kb => {
-    kb.style.display = 'grid';
-    kb.style.gridTemplateColumns = 'repeat(9, 1fr)';
-    kb.style.gap = '6px';
-    kb.style.width = '100%';
-  });
-}
-
-function moveBackToDesktop() {
-  if (!originalSpots) return;
-
-  const leftPanel  = document.querySelector('.left-panel');
-  const stickWrap  = document.getElementById('stick-container');
-  const attemptBox = document.getElementById('attemptBox');
-
-  // 放回原位（照原本的兄弟節點插回）
-  const {
-    leftParent, leftNext,
-    stickParent, stickNext,
-    attemptParent, attemptNext
-  } = originalSpots;
-
-  if (leftParent)   leftParent.insertBefore(leftPanel,   leftNext);
-  if (stickParent)  stickParent.insertBefore(stickWrap,  stickNext);
-  if (attemptParent)attemptParent.insertBefore(attemptBox, attemptNext);
-
-  // 還原鍵盤列數（回 3 列）
-  document.querySelectorAll('.keyboard').forEach(kb => {
-    kb.style.gridTemplateColumns = 'repeat(3, 1fr)';
-    kb.style.width = '192px';
-  });
-}
-
-/* ===== 直向手機／橫向桌面 自動重排（只搬鍵盤） ===== */
-
-let originalParents = null;
+/* ========= 直向手機／橫向桌面：自動重排 ========= */
+let originalPos = null;
 
 function isPortraitPhone(){
   return window.innerWidth <= 820 && window.innerHeight > window.innerWidth;
 }
 
-function rememberOriginalParents(){
-  if (originalParents) return;              // 只記一次
-  const leftPanel   = document.querySelector('.left-panel');
-  const conKeys     = document.getElementById('consonantKeys');
-  const vowKeys     = document.getElementById('vowelKeys');
-  const conLabel    = conKeys?.previousElementSibling; // 「Consonants」
-  const vowLabel    = vowKeys?.previousElementSibling; // 「Vowels」
-  const stickWrap   = document.getElementById('stick-container');
-  const attemptBox  = document.getElementById('attemptBox');
+function rememberOriginal(){
+  if (originalPos) return; // 只記一次
+  const leftPanel  = document.querySelector('.left-panel');
+  const stickWrap  = document.getElementById('stick-container');
+  const attemptBox = document.getElementById('attemptBox');
 
-  originalParents = {
-    leftPanel,
-    conLabelParent: conLabel?.parentNode || null,
-    conLabelNext:   conLabel?.nextSibling || null,
-    conKeysParent:  conKeys?.parentNode || null,
-    conKeysNext:    conKeys?.nextSibling || null,
-    vowLabelParent: vowLabel?.parentNode || null,
-    vowLabelNext:   vowLabel?.nextSibling || null,
-    vowKeysParent:  vowKeys?.parentNode || null,
-    vowKeysNext:    vowKeys?.nextSibling || null,
-
-    stickParent:    stickWrap?.parentNode || null,
-    stickNext:      stickWrap?.nextSibling || null,
-    attemptParent:  attemptBox?.parentNode || null,
-    attemptNext:    attemptBox?.nextSibling || null
+  originalPos = {
+    leftParent:  leftPanel?.parentNode || null,
+    leftNext:    leftPanel?.nextSibling || null,
+    stickParent: stickWrap?.parentNode || null,
+    stickNext:   stickWrap?.nextSibling || null,
+    attParent:   attemptBox?.parentNode || null,
+    attNext:     attemptBox?.nextSibling || null
   };
 }
 
 function moveToMobile(){
-  const slot       = document.getElementById('mobileKeyboardSlot');
-  const bottom     = document.getElementById('mobileBottomRow');
-  const conKeys    = document.getElementById('consonantKeys');
-  const vowKeys    = document.getElementById('vowelKeys');
-  const conLabel   = conKeys?.previousElementSibling;
-  const vowLabel   = vowKeys?.previousElementSibling;
-  const stickWrap  = document.getElementById('stick-container');
-  const attemptBox = document.getElementById('attemptBox');
+  const slot   = document.getElementById('mobileLeftPanelSlot');
+  const bottom = document.getElementById('mobileBottomRow');
+  const left   = document.querySelector('.left-panel');
+  const stick  = document.getElementById('stick-container');
+  const att    = document.getElementById('attemptBox');
+  if (!slot || !bottom || !left || !stick || !att) return;
 
-  if (!slot || !bottom || !conKeys || !vowKeys || !conLabel || !vowLabel) return;
+  // 1) 整個 left-panel 搬到輸入欄 + submit 下面
+  slot.appendChild(left);
 
-  // 1) 建立「手機鍵盤包」並把兩組標籤+鍵盤搬入
-  let wrap = document.getElementById('mobileKeyboardWrap');
-  if (!wrap){
-    wrap = document.createElement('div');
-    wrap.id = 'mobileKeyboardWrap';
-    slot.appendChild(wrap);
-  }else{
-    wrap.innerHTML = '';
-  }
-  wrap.appendChild(conLabel);
-  wrap.appendChild(conKeys);
-  wrap.appendChild(vowLabel);
-  wrap.appendChild(vowKeys);
+  // 2) Stick（左）+ 錯字（右）置於更下面
+  bottom.appendChild(stick);
+  bottom.appendChild(att);
 
-  // 2) Stick + 錯字 → 放到底部一行（左／右）
-  bottom.appendChild(stickWrap);
-  bottom.appendChild(attemptBox);
-
-  // 3) 每行 9 粒（保險再設一次）
-  wrap.querySelectorAll('.keyboard').forEach(kb=>{
+  // 3) 保險：把兩個鍵盤設成 9 格一行
+  left.querySelectorAll('.keyboard').forEach(kb=>{
     kb.style.display = 'grid';
     kb.style.gridTemplateColumns = 'repeat(9, 1fr)';
-    kb.style.gap = '6px';
     kb.style.width = '100%';
   });
 }
 
 function moveBackToDesktop(){
-  if (!originalParents) return;
+  if (!originalPos) return;
+  const {leftParent,leftNext,stickParent,stickNext,attParent,attNext} = originalPos;
+  const left  = document.querySelector('.left-panel');
+  const stick = document.getElementById('stick-container');
+  const att   = document.getElementById('attemptBox');
 
-  const {
-    conLabelParent, conLabelNext,
-    conKeysParent,  conKeysNext,
-    vowLabelParent, vowLabelNext,
-    vowKeysParent,  vowKeysNext,
-    stickParent, stickNext,
-    attemptParent, attemptNext
-  } = originalParents;
+  if (leftParent)  leftParent.insertBefore(left,  leftNext);
+  if (stickParent) stickParent.insertBefore(stick, stickNext);
+  if (attParent)   attParent.insertBefore(att,   attNext);
 
-  const conKeys   = document.getElementById('consonantKeys');
-  const vowKeys   = document.getElementById('vowelKeys');
-  const conLabel  = conKeys?.previousElementSibling; // 目前在手機包裡
-  const vowLabel  = vowKeys?.previousElementSibling;
-  const stickWrap = document.getElementById('stick-container');
-  const attemptBox= document.getElementById('attemptBox');
-
-  // 依原先位置插回去（不必完全同一 index，保持順序即可）
-  if (conLabelParent)  conLabelParent.insertBefore(conLabel,  conLabelNext);
-  if (conKeysParent)   conKeysParent.insertBefore(conKeys,   conKeysNext);
-  if (vowLabelParent)  vowLabelParent.insertBefore(vowLabel, vowLabelNext);
-  if (vowKeysParent)   vowKeysParent.insertBefore(vowKeys,   vowKeysNext);
-
-  if (stickParent)     stickParent.insertBefore(stickWrap,   stickNext);
-  if (attemptParent)   attemptParent.insertBefore(attemptBox,attemptNext);
-
-  // 復原鍵盤列數（回 3 列、寬 192px）
-  document.querySelectorAll('.keyboard').forEach(kb=>{
+  // 復原鍵盤（3 列、192px）
+  document.querySelectorAll('.left-panel .keyboard').forEach(kb=>{
     kb.style.gridTemplateColumns = 'repeat(3, 1fr)';
     kb.style.width = '192px';
   });
-
-  // 清空手機鍵盤包（避免殘留空殼）
-  const wrap = document.getElementById('mobileKeyboardWrap');
-  if (wrap) wrap.innerHTML = '';
 }
 
-function layoutByOrientation(){
-  rememberOriginalParents();
+function layout(){
+  rememberOriginal();
   if (isPortraitPhone()){
     moveToMobile();
   }else{
@@ -2019,8 +1947,7 @@ function layoutByOrientation(){
   }
 }
 
-// 初始及變更時執行（用 rAF 確保尺寸穩定後再跑）
-const runLayout = () => requestAnimationFrame(layoutByOrientation);
+const runLayout = () => requestAnimationFrame(layout);
 window.addEventListener('load', runLayout);
 window.addEventListener('resize', runLayout);
 window.addEventListener('orientationchange', runLayout);

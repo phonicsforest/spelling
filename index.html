@@ -619,47 +619,38 @@ body{
   <div id="lessonLabel">Lesson 7-1</div>
   <button id="playBtn" onclick="handlePlay()">Play</button>
 </div>
-  <div class="label">ConsonantsAA</div>
+  <div class="label">Consonants3333333</div>
         <div class="keyboard" id="consonantKeys"></div>
         <div class="label">Vowels</div>
         <div class="keyboard" id="vowelKeys"></div>
       </div>
 
-      <div class="image-input-wrapper">
-        <div class="image-container">
-      <div id="blankImage"></div>     <!-- 白色佔位 -->
+<div class="image-input-wrapper">
+  <div class="image-container">
+    <div id="blankImage"></div>
     <img id="wordImage" src="" alt="">
- <div id="wordHint" class="word-hint"></div> <!-- 左下角中文覆蓋 -->          <button id="soundBtn" onclick="playAudio()">
-            <img src="speaker.png" alt="Play Sound">
-          </button>
-        </div>
-<div class="input-row">
-  <div class="input-container" id="inputContainer">
-    <input type="text" id="inputBox" readonly />
-    <div id="scorePopup">+10</div>
-<!-- 手機直向：鍵盤插槽（輸入欄下） -->
-<div id="mobileKeyboardSlot"></div>
-
-<!-- 手機直向：Stick + 錯字（鍵盤下方一行：左/右） -->
-<div id="mobileBottomRow" class="mobile-bottom"></div>
-
+    <div id="wordHint" class="word-hint"></div>
+    <button id="soundBtn" onclick="playAudio()">
+      <img src="speaker.png" alt="Play Sound">
+    </button>
   </div>
 
+  <div class="input-row">
+    <div class="input-container" id="inputContainer">
+      <input type="text" id="inputBox" readonly />
+      <div id="scorePopup">+10</div>
+    </div>
+  </div>
+
+  <!-- 最上：submit -->
+  <button id="submitBtn" onclick="submitAnswer()">submit</button>
+
+  <!-- 中間：keyboard 會搬入嚟 -->
+  <div id="mobileKeyboardSlot"></div>
+
+  <!-- 最下：Stick + 錯字 會搬入嚟（左右排） -->
+  <div id="mobileBottomRow" class="mobile-bottom"></div>
 </div>
-<!-- 手機直向：鍵盤插槽（輸入欄下） -->
-<div id="mobileKeyboardSlot"></div>
-
-<!-- 手機直向：Stick + 錯字（鍵盤下：左/右） -->
-<div id="mobileBottomRow" class="mobile-bottom"></div>
-
-<button id="submitBtn" onclick="submitAnswer()">submit</button>
-      </div>
-
-<!-- 手機直向：整個 left-panel 會搬到呢個位置 -->
-<div id="mobileLeftPanelSlot"></div>
-
-<!-- 手機直向：Stick + 錯字（鍵盤之下：左／右） -->
-<div id="mobileBottomRow" class="mobile-bottom"></div>
 
 
       <div id="stick-container">
@@ -1875,70 +1866,70 @@ function resetInput(length) {
 switchSet(1); 
 
 /* ========= 直向手機／橫向桌面：自動重排 ========= */
-let originalPos = null;
+/* ===== 手機直向／桌面橫向：自動重排（只搬 keyboard） ===== */
+let restorePoints = null;
 
 function isPortraitPhone(){
   return window.innerWidth <= 820 && window.innerHeight > window.innerWidth;
 }
 
 function rememberOriginal(){
-  if (originalPos) return; // 只記一次
-  const leftPanel  = document.querySelector('.left-panel');
-  const stickWrap  = document.getElementById('stick-container');
-  const attemptBox = document.getElementById('attemptBox');
+  if (restorePoints) return;
+  const leftPanel   = document.querySelector('.left-panel');
+  const kb1         = document.getElementById('consonantKeys');
+  const kb2         = document.getElementById('vowelKeys');
+  const stickWrap   = document.getElementById('stick-container');
+  const attemptBox  = document.getElementById('attemptBox');
 
-  originalPos = {
-    leftParent:  leftPanel?.parentNode || null,
-    leftNext:    leftPanel?.nextSibling || null,
-    stickParent: stickWrap?.parentNode || null,
-    stickNext:   stickWrap?.nextSibling || null,
-    attParent:   attemptBox?.parentNode || null,
-    attNext:     attemptBox?.nextSibling || null
+  restorePoints = {
+    kb1Parent: kb1?.parentNode || null,
+    kb1Next:   kb1?.nextSibling || null,
+    kb2Parent: kb2?.parentNode || null,
+    kb2Next:   kb2?.nextSibling || null,
+    stickParent:  stickWrap?.parentNode || null,
+    stickNext:    stickWrap?.nextSibling || null,
+    attParent:    attemptBox?.parentNode || null,
+    attNext:      attemptBox?.nextSibling || null
   };
 }
 
 function moveToMobile(){
-  const slot   = document.getElementById('mobileLeftPanelSlot');
-  const bottom = document.getElementById('mobileBottomRow');
-  const left   = document.querySelector('.left-panel');
-  const stick  = document.getElementById('stick-container');
-  const att    = document.getElementById('attemptBox');
-  if (!slot || !bottom || !left || !stick || !att) return;
+  const kbSlot   = document.getElementById('mobileKeyboardSlot');
+  const bottom   = document.getElementById('mobileBottomRow');
+  const kb1      = document.getElementById('consonantKeys');
+  const kb2      = document.getElementById('vowelKeys');
+  const stick    = document.getElementById('stick-container');
+  const attempts = document.getElementById('attemptBox');
+  if (!kbSlot || !bottom || !kb1 || !kb2 || !stick || !attempts) return;
 
-  // 1) 整個 left-panel 搬到輸入欄 + submit 下面
-  slot.appendChild(left);
+  // 中間：keyboard 兩個一起搬到 submit 下方的 slot
+  kbSlot.innerHTML = '';                // 清乾淨
+  kbSlot.appendChild(kb1.parentNode.querySelector('.label') ?? document.createElement('div')); // 可忽略label
+  kbSlot.appendChild(kb1);
+  kbSlot.appendChild(kb2.parentNode.querySelector('.label') ?? document.createElement('div'));
+  kbSlot.appendChild(kb2);
 
-  // 2) Stick（左）+ 錯字（右）置於更下面
+  // 最下：Stick（左） + 錯字（右）
+  bottom.innerHTML = '';
   bottom.appendChild(stick);
-  bottom.appendChild(att);
-
-  // 3) 保險：把兩個鍵盤設成 9 格一行
-  left.querySelectorAll('.keyboard').forEach(kb=>{
-    kb.style.display = 'grid';
-    kb.style.gridTemplateColumns = 'repeat(9, 1fr)';
-    kb.style.width = '100%';
-  });
+  bottom.appendChild(attempts);
 }
 
 function moveBackToDesktop(){
-  if (!originalPos) return;
-  const {leftParent,leftNext,stickParent,stickNext,attParent,attNext} = originalPos;
-  const left  = document.querySelector('.left-panel');
-  const stick = document.getElementById('stick-container');
-  const att   = document.getElementById('attemptBox');
+  if (!restorePoints) return;
+  const {kb1Parent,kb1Next,kb2Parent,kb2Next,stickParent,stickNext,attParent,attNext} = restorePoints;
+  const kb1      = document.getElementById('consonantKeys');
+  const kb2      = document.getElementById('vowelKeys');
+  const stick    = document.getElementById('stick-container');
+  const attempts = document.getElementById('attemptBox');
 
-  if (leftParent)  leftParent.insertBefore(left,  leftNext);
-  if (stickParent) stickParent.insertBefore(stick, stickNext);
-  if (attParent)   attParent.insertBefore(att,   attNext);
-
-  // 復原鍵盤（3 列、192px）
-  document.querySelectorAll('.left-panel .keyboard').forEach(kb=>{
-    kb.style.gridTemplateColumns = 'repeat(3, 1fr)';
-    kb.style.width = '192px';
-  });
+  if (kb1Parent)  kb1Parent.insertBefore(kb1,  kb1Next);
+  if (kb2Parent)  kb2Parent.insertBefore(kb2,  kb2Next);
+  if (stickParent)stickParent.insertBefore(stick, stickNext);
+  if (attParent)  attParent.insertBefore(attempts, attNext);
 }
 
-function layout(){
+function relayout(){
   rememberOriginal();
   if (isPortraitPhone()){
     moveToMobile();
@@ -1947,10 +1938,10 @@ function layout(){
   }
 }
 
-const runLayout = () => requestAnimationFrame(layout);
-window.addEventListener('load', runLayout);
-window.addEventListener('resize', runLayout);
-window.addEventListener('orientationchange', runLayout);
+const runRelayout = () => requestAnimationFrame(relayout);
+window.addEventListener('load', runRelayout);
+window.addEventListener('resize', runRelayout);
+window.addEventListener('orientationchange', runRelayout);
 </script>
 </body>
 </html>

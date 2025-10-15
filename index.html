@@ -604,6 +604,11 @@ box-sizing: border-box;
   </div>
 
 </div>
+<!-- 手機直向：鍵盤插槽（輸入欄下） -->
+<div id="mobileKeyboardSlot"></div>
+
+<!-- 手機直向：Stick + 錯字（鍵盤下：左/右） -->
+<div id="mobileBottomRow" class="mobile-bottom"></div>
 
 <button id="submitBtn" onclick="submitAnswer()">submit</button>
       </div>
@@ -1891,19 +1896,134 @@ function moveBackToDesktop() {
   });
 }
 
-function layoutByOrientation() {
-  rememberOriginalSpots();
-  if (isPortraitPhone()) {
+/* ===== 直向手機／橫向桌面 自動重排（只搬鍵盤） ===== */
+
+let originalParents = null;
+
+function isPortraitPhone(){
+  return window.innerWidth <= 820 && window.innerHeight > window.innerWidth;
+}
+
+function rememberOriginalParents(){
+  if (originalParents) return;              // 只記一次
+  const leftPanel   = document.querySelector('.left-panel');
+  const conKeys     = document.getElementById('consonantKeys');
+  const vowKeys     = document.getElementById('vowelKeys');
+  const conLabel    = conKeys?.previousElementSibling; // 「Consonants」
+  const vowLabel    = vowKeys?.previousElementSibling; // 「Vowels」
+  const stickWrap   = document.getElementById('stick-container');
+  const attemptBox  = document.getElementById('attemptBox');
+
+  originalParents = {
+    leftPanel,
+    conLabelParent: conLabel?.parentNode || null,
+    conLabelNext:   conLabel?.nextSibling || null,
+    conKeysParent:  conKeys?.parentNode || null,
+    conKeysNext:    conKeys?.nextSibling || null,
+    vowLabelParent: vowLabel?.parentNode || null,
+    vowLabelNext:   vowLabel?.nextSibling || null,
+    vowKeysParent:  vowKeys?.parentNode || null,
+    vowKeysNext:    vowKeys?.nextSibling || null,
+
+    stickParent:    stickWrap?.parentNode || null,
+    stickNext:      stickWrap?.nextSibling || null,
+    attemptParent:  attemptBox?.parentNode || null,
+    attemptNext:    attemptBox?.nextSibling || null
+  };
+}
+
+function moveToMobile(){
+  const slot       = document.getElementById('mobileKeyboardSlot');
+  const bottom     = document.getElementById('mobileBottomRow');
+  const conKeys    = document.getElementById('consonantKeys');
+  const vowKeys    = document.getElementById('vowelKeys');
+  const conLabel   = conKeys?.previousElementSibling;
+  const vowLabel   = vowKeys?.previousElementSibling;
+  const stickWrap  = document.getElementById('stick-container');
+  const attemptBox = document.getElementById('attemptBox');
+
+  if (!slot || !bottom || !conKeys || !vowKeys || !conLabel || !vowLabel) return;
+
+  // 1) 建立「手機鍵盤包」並把兩組標籤+鍵盤搬入
+  let wrap = document.getElementById('mobileKeyboardWrap');
+  if (!wrap){
+    wrap = document.createElement('div');
+    wrap.id = 'mobileKeyboardWrap';
+    slot.appendChild(wrap);
+  }else{
+    wrap.innerHTML = '';
+  }
+  wrap.appendChild(conLabel);
+  wrap.appendChild(conKeys);
+  wrap.appendChild(vowLabel);
+  wrap.appendChild(vowKeys);
+
+  // 2) Stick + 錯字 → 放到底部一行（左／右）
+  bottom.appendChild(stickWrap);
+  bottom.appendChild(attemptBox);
+
+  // 3) 每行 9 粒（保險再設一次）
+  wrap.querySelectorAll('.keyboard').forEach(kb=>{
+    kb.style.display = 'grid';
+    kb.style.gridTemplateColumns = 'repeat(9, 1fr)';
+    kb.style.gap = '6px';
+    kb.style.width = '100%';
+  });
+}
+
+function moveBackToDesktop(){
+  if (!originalParents) return;
+
+  const {
+    conLabelParent, conLabelNext,
+    conKeysParent,  conKeysNext,
+    vowLabelParent, vowLabelNext,
+    vowKeysParent,  vowKeysNext,
+    stickParent, stickNext,
+    attemptParent, attemptNext
+  } = originalParents;
+
+  const conKeys   = document.getElementById('consonantKeys');
+  const vowKeys   = document.getElementById('vowelKeys');
+  const conLabel  = conKeys?.previousElementSibling; // 目前在手機包裡
+  const vowLabel  = vowKeys?.previousElementSibling;
+  const stickWrap = document.getElementById('stick-container');
+  const attemptBox= document.getElementById('attemptBox');
+
+  // 依原先位置插回去（不必完全同一 index，保持順序即可）
+  if (conLabelParent)  conLabelParent.insertBefore(conLabel,  conLabelNext);
+  if (conKeysParent)   conKeysParent.insertBefore(conKeys,   conKeysNext);
+  if (vowLabelParent)  vowLabelParent.insertBefore(vowLabel, vowLabelNext);
+  if (vowKeysParent)   vowKeysParent.insertBefore(vowKeys,   vowKeysNext);
+
+  if (stickParent)     stickParent.insertBefore(stickWrap,   stickNext);
+  if (attemptParent)   attemptParent.insertBefore(attemptBox,attemptNext);
+
+  // 復原鍵盤列數（回 3 列、寬 192px）
+  document.querySelectorAll('.keyboard').forEach(kb=>{
+    kb.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    kb.style.width = '192px';
+  });
+
+  // 清空手機鍵盤包（避免殘留空殼）
+  const wrap = document.getElementById('mobileKeyboardWrap');
+  if (wrap) wrap.innerHTML = '';
+}
+
+function layoutByOrientation(){
+  rememberOriginalParents();
+  if (isPortraitPhone()){
     moveToMobile();
-  } else {
+  }else{
     moveBackToDesktop();
   }
 }
 
-// 初始及變更時執行
-window.addEventListener('load', layoutByOrientation);
-window.addEventListener('resize', layoutByOrientation);
-window.addEventListener('orientationchange', layoutByOrientation);
+// 初始及變更時執行（用 rAF 確保尺寸穩定後再跑）
+const runLayout = () => requestAnimationFrame(layoutByOrientation);
+window.addEventListener('load', runLayout);
+window.addEventListener('resize', runLayout);
+window.addEventListener('orientationchange', runLayout);
 </script>
 </body>
 </html>

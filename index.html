@@ -541,6 +541,9 @@ box-sizing: border-box;
   }
 }
 
+#mobileKeyboardSlot { width: 100%; }
+#mobileKeyboardSlot .keyboard { width: 100% !important; }
+
 
 #wordImage{
   width:100%;
@@ -619,7 +622,7 @@ body{
   <div id="lessonLabel">Lesson 7-1</div>
   <button id="playBtn" onclick="handlePlay()">Play</button>
 </div>
-  <div class="label">Consonants3333333</div>
+  <div class="label">Consonants44444</div>
         <div class="keyboard" id="consonantKeys"></div>
         <div class="label">Vowels</div>
         <div class="keyboard" id="vowelKeys"></div>
@@ -1902,17 +1905,31 @@ function moveToMobile(){
   const attempts = document.getElementById('attemptBox');
   if (!kbSlot || !bottom || !kb1 || !kb2 || !stick || !attempts) return;
 
-  // 中間：keyboard 兩個一起搬到 submit 下方的 slot
-  kbSlot.innerHTML = '';                // 清乾淨
-  kbSlot.appendChild(kb1.parentNode.querySelector('.label') ?? document.createElement('div')); // 可忽略label
-  kbSlot.appendChild(kb1);
-  kbSlot.appendChild(kb2.parentNode.querySelector('.label') ?? document.createElement('div'));
-  kbSlot.appendChild(kb2);
+  // 只搬兩個 keyboard；label 在這裡重新建立，避免從左欄搬走
+  const mkLabel = (txt) => {
+    const d = document.createElement('div');
+    d.className = 'label';
+    d.textContent = txt;
+    return d;
+  };
 
-  // 最下：Stick（左） + 錯字（右）
-  bottom.innerHTML = '';
-  bottom.appendChild(stick);
-  bottom.appendChild(attempts);
+  kbSlot.replaceChildren(
+    mkLabel('Consonants'),
+    kb1,
+    mkLabel('Vowels'),
+    kb2
+  );
+
+  // 手機直向：每行 9 粒（再保險設一次）
+  kb1.style.width = '100%';
+  kb2.style.width = '100%';
+  kb1.style.display = 'grid';
+  kb2.style.display = 'grid';
+  kb1.style.gridTemplateColumns = 'repeat(9, 1fr)';
+  kb2.style.gridTemplateColumns = 'repeat(9, 1fr)';
+
+  // 最下：左 Stick、右 錯字
+  bottom.replaceChildren(stick, attempts);
 }
 
 function moveBackToDesktop(){

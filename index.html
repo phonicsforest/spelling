@@ -231,6 +231,28 @@
       transition: transform 0.15s ease, filter 0.2s ease; z-index: 2000; box-shadow: none;
     }
     #playBtn:hover { transform: scale(1.05); filter: brightness(1.1); }
+/* --- Mobile tip overlay --- */
+#mobileTip{
+  position: fixed;
+  inset: 0;
+  display: none;                 /* 需要時用 JS 顯示 */
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;                 /* 高過其他元素 */
+  pointer-events: none;          /* 唔阻擋點擊 */
+}
+#mobileTip span{
+  color: #fff;
+  font-size: 22px;
+  padding: 10px 14px;
+  text-align: center;
+  /* 黑色 blur shadow */
+  text-shadow:
+    0 0 6px rgba(0,0,0,.95),
+    0 0 14px rgba(0,0,0,.85),
+    0 0 24px rgba(0,0,0,.7);
+}
+
   </style>
 </head>
 <body>
@@ -280,6 +302,11 @@
           </div>
         </div>
       </div>
+<!-- Mobile portrait tip -->
+<div id="mobileTip">
+  <span>Please turn your phone sideways to play.</span>
+</div>
+
 
       <audio id="audio" src=""></audio>
       <audio id="winSound" src="win.mp3"></audio>
@@ -785,6 +812,38 @@ function fitStage(){
   const stage = document.querySelector('.container');
   if (stage) stage.style.transform = `scale(${scale})`;
 }
+// ===== Mobile portrait tip =====
+function isMobileUA(){
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+}
+function showMobileTip(){
+  const el = document.getElementById('mobileTip');
+  if (!el) return;
+  el.style.display = 'flex';
+  clearTimeout(showMobileTip._t);
+  showMobileTip._t = setTimeout(() => {
+    el.style.display = 'none';
+  }, 4000); // 4 秒後消失
+}
+function maybeShowMobileTip(){
+  if (!isMobileUA()) return;
+  const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+  if (isPortrait) showMobileTip();
+}
+
+// 初次載入／轉向時檢查
+window.addEventListener('load', () => {
+  fitStage();
+  maybeShowMobileTip();
+});
+window.addEventListener('orientationchange', () => {
+  // 少少延遲等瀏覽器更新方向狀態
+  setTimeout(() => {
+    fitStage();
+    maybeShowMobileTip();
+  }, 120);
+});
+
 window.addEventListener('load', fitStage);
 window.addEventListener('resize', fitStage);
 window.addEventListener('orientationchange', fitStage);

@@ -3,8 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lesson 7-1</title>
+  <title>Lesson 7-2</title>
   <style>
+    :root{
+      --game-w: 1000px; /* 固定遊戲寬 */
+      --game-h: 720px;  /* 固定遊戲高 */
+    }
+
     html, body {
       margin: 0;
       padding: 0;
@@ -13,29 +18,38 @@
       background-color: #fdf6e3;
     }
 
+    /* 背景鋪滿；外層只負責置中與縮放 */
     body {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
       background-image: url('background.png');
       background-size: cover;
       background-repeat: no-repeat;
+      background-position: center top;
     }
 
-.container{
-  width: min(1000px, 100vw);
-  margin: 0 auto;
-  padding: 10px;
-}
-.game-row{
-  display: grid;
-  grid-template-columns: 192px 1fr 300px;
-  gap: 16px;
-  align-items: start;
-}
-    .left-panel {
-      width: 192px;
+    /* ★ 新增外層：固定把整個遊戲當成一個「盒」來縮放 */
+    .stage-outer{
+      width: 100vw;
+      height: 100svh;               /* 行動裝置安全視高 */
+      display: flex;
+      justify-content: center;       /* 水平置中 */
+      align-items: flex-start;       /* 置頂（底部自然留白） */
+      overflow: hidden;              /* 不出捲軸 */
     }
+
+    .container {
+      transform-origin: top center;  /* 以「頂部中央」為縮放基準 */
+      width: var(--game-w);
+      height: var(--game-h);
+      transform: scale(1);           /* 桌面 1:1 顯示，手機由 JS 動態改 */
+      display: block;
+    }
+
+    .game-row {
+      display: flex;
+      gap: 20px;
+    }
+
+    .left-panel { width: 192px; }
 
     select {
       width: 192px;
@@ -55,34 +69,22 @@
       font-weight: normal;
     }
 
-  .keyboard{
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px 6px;
-  width: 192px;               /* 保持左欄原寬 */
-}
-.keyboard button{
-  width: 100%;
-  height: 60px;
-  font-size: 24px;
-  background-color: #8B4513;  /* 啡底 */
-  color: #fff;                /* 白字 */
-  border: none;
-  cursor: pointer;
-}
-.keyboard button:hover{
-  background-color:#3a1f00;
-  box-shadow: 0 2px 8px rgba(0,0,0,.3);
-}
-.keyboard button.backspace{
-  background-color:#f4c542;
-  color:#8B4513;
-}
-.keyboard button.key-disabled{
-  background-color:#d2a679 !important;
-  cursor:not-allowed;
-}
-.keyboard button.key-disabled:hover{ box-shadow:none }
+    .keyboard { display: flex; flex-wrap: wrap; width: 192px; }
+
+    .keyboard button {
+      width: 60px;
+      height: 60px;
+      margin: 2px;
+      font-size: 24px;
+      background-color: #8B4513;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .keyboard button.backspace { background-color: #f4c542; color: #8B4513; }
+    .keyboard button:hover { background-color: #3a1f00; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .keyboard button.key-disabled { background-color: #d2a679 !important; cursor: not-allowed; }
+    .keyboard button.key-disabled:hover { box-shadow: none; background-color: #d2a679 !important; }
 
     .image-input-wrapper {
       display: flex;
@@ -91,999 +93,288 @@
       margin-top: 74px;
     }
 
-.image-container{
-  position: relative;
-  width: 570px;              /* 桌面同你原尺寸一致 */
-  height: 390px;
-} 
+    .image-container { width: 570px; height: 390px; position: relative; }
+    .word-hint{
+      position: absolute; left: 10px; bottom: 10px; padding: 4px 8px;
+      color: #8B4513; font-size: 22px; line-height: 1.1; background: transparent;
+      pointer-events: none; z-index: 2;
+    }
 
-.word-hint{
-  position: absolute;
-  left: 10px;
-  bottom: 10px;
-  padding: 4px 8px;
-  color: #8B4513;
-  font-size: 22px;
-  line-height: 1.1;
-  background: rgba(255,255,255,0);  /* 透明疊上圖 */
-  pointer-events: none;
-  z-index: 2;
-}
-#wordImage{
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-#wordImage.placeholder{
-  background:#fff;
-}
-#soundBtn{
-  position:absolute; right:10px; bottom:10px;
-  background:none; border:none; padding:0; cursor:pointer; z-index:3;
-}
-#soundBtn img{ width:50px; height:auto; transition:filter .25s ease; }
-#soundBtn:hover img{ filter:brightness(1.2); }
-#soundBtn[disabled]{ opacity:.4; pointer-events:none; }
+    #wordImage { width: 100%; height: 100%; object-fit: contain; display: block; }
+    #wordImage.placeholder{ background:#fff; }
 
-/* 讓 stick 可以縮放 */
-#stick {
-  width: 300px;
-  height: 470px;
-  margin-top: 10px;
-  transform-origin: top center; /* 方便縮放睇落自然 */
-}
+    #soundBtn {
+      position: absolute; bottom: 0; right: 0;
+      background: none; border: none; padding: 0; cursor: pointer;
+    }
+    #soundBtn img { width: 50px; height: auto; transition: filter 0.25s ease; }
+    #soundBtn:hover img { filter: brightness(1.2); }
 
-/* 輸入框 + 曾試清單 橫向排 */
-.input-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
+    #stick {
+      width: 300px; height: 470px; margin-top: 10px; transform-origin: top center;
+    }
 
-/* 深啡色曾試清單 box（用同鍵盤背景色 #8B4513） */
-.attempt-box {
-  display: none;
-  background-color: transparent; /* 全透明 */
-  color: #8B4513; /* 深啡字 */
-  font-size: 270%; /* 原來字大3倍 → 細10% 即2.7倍 */
-  font-weight: normal; /* 不要粗體 */
-  padding: 5px;
-  margin-top: 10px;
-  text-align: center;
-}
+    .input-row { display: flex; align-items: flex-start; gap: 12px; }
 
-#attemptList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 每行三個 */
-  grid-auto-rows: auto;
-  row-gap: 6px;  /* 行距 */
-  column-gap: 10px; /* 每字之間有啲空隙 */
-}
+    .attempt-box {
+      display: none; background-color: transparent; color: #8B4513;
+      font-size: 270%; font-weight: normal; padding: 5px; margin-top: 10px; text-align: center;
+    }
+    #attemptList {
+      list-style: none; padding: 0; margin: 0; display: grid;
+      grid-template-columns: repeat(3, 1fr); grid-auto-rows: auto; row-gap: 6px; column-gap: 10px;
+    }
+    #attemptList li { text-decoration: line-through; opacity: 0.9; }
+    #attemptList .strike { text-decoration: line-through; }
 
-#attemptList li {
-  text-decoration: line-through; /* 加橫線 */
-  opacity: 0.9;
-}
+    .big-tick {
+      position: absolute; font-size: 120px; color: #22c55e; opacity: 0;
+      transform: translate(0, -20px) scale(0.8);
+      transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; z-index: 500;
+    }
+    .big-tick.show { opacity: 1; transform: translate(0, -20px) scale(1); }
 
-#attemptList .strike {
-  text-decoration: line-through;
-}
-/* 綠色大 tick（放在 input-container 之上） */
-/* ✅ 綠色大 tick：放喺 submit 按鈕右邊 */
-/* ✅ 綠色大 tick：在 Submit 右側、稍微疊上輸入區 */
-/* ✅ 綠色 tick：出現在輸入字尾位置 */
-.big-tick {
-  position: absolute;
-  font-size: 120px;       /* 大一倍 */
-  color: #22c55e;         /* 綠色 */
-  opacity: 0;
-  transform: translate(0, -20px) scale(0.8); /* 稍微上移一點 */
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  pointer-events: none;
-  z-index: 500;
-}
+    .input-container { width: 570px; position: relative; text-align: center; }
 
-.big-tick.show {
-  opacity: 1;
-  transform: translate(0, -20px) scale(1);
-}
-
-
- .input-container{ width: 100%; }
-
-#submitBtn{
-  width:auto !important;               /* 直接覆蓋先前 100% 設定 */
-  display:inline-block;
-  padding:10px 22px;                   /* 比文字闊少少 */
-  font-size:20px; background:#20B2AA; color:#fff; border:none;
-  transition:background-color .25s ease, transform .1s ease;
-}
-
-#lessonLabel {
-  font-size: 24px;
-  font-weight: bold;
-  color: #5a3e2b;
-  text-align: center;
-  margin-top: 10px;
-}
+    #lessonLabel {
+      font-size: 24px; font-weight: bold; color: #5a3e2b; text-align: center; margin-top: 10px;
+    }
 
     #inputBox {
-      width: 564px;
-      height: 160px;
-      font-size: 100px;
-      text-align: center;
-      color: #8B4513;
-      border: 2px solid #888;
-      background-color: rgba(255,255,255,0.5);
+      width: 564px; height: 160px; font-size: 100px; text-align: center; color: #8B4513;
+      border: 2px solid #888; background-color: rgba(255,255,255,0.5);
     }
-.input-box {
- width: 100px;
-  height: 100px;
-  color: #8B4513;  
-  font-size: 64px;
-  text-align: center;
-  margin: 5px;
-  border: 2px solid #888;
-  background-color: rgba(255, 255, 255, 0.5);
-box-sizing: border-box;
-}
-.input-box.locked {
-  color: #8B4513;
-}
-.split-input-group {
- display: inline-flex;  /* 改為 inline-flex 才能在 text-align: center 裡置中 */
-  justify-content: center;
-  margin-top: 20px;
-}
+
+    .input-box {
+      width: 100px; height: 100px; color: #8B4513; font-size: 64px; text-align: center;
+      margin: 5px; border: 2px solid #888; background-color: rgba(255, 255, 255, 0.5); box-sizing: border-box;
+    }
+    .input-box.locked { color: #8B4513; }
+    .split-input-group { display: inline-flex; justify-content: center; margin-top: 20px; }
+
     #submitBtn {
-      margin-top: 10px;
-      font-size: 20px;
-      padding: 8px 16px;
-      background-color: #20B2AA;
-      color: white;
-      border: none;
-      position: relative;
-      transition: background-color 0.25s ease;
+      margin-top: 10px; font-size: 20px; padding: 8px 16px; background-color: #20B2AA;
+      color: white; border: none; position: relative; transition: background-color 0.25s ease;
     }
-#submitBtn:hover{ background:#008080; transform:translateY(-1px); box-shadow:0 0 10px rgba(0,128,128,.6); }
-    #stick-container {
-      text-align: center;
-      margin-top: 74px;
-    }
+    #submitBtn:hover { background-color: #008080; transform: scale(1.05); box-shadow: 0 0 10px rgba(0, 128, 128, 0.6); }
 
-    /* stick 縮細 */
-  #stick{
-    width: min(70vw, 320px);
-    height: auto;
-  }
+    #stick-container { text-align: center; margin-top: 74px; }
 
-    #scoreDisplay {
-      color: #8B4513;
-      font-size: 28px;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
+    #scoreDisplay { color: #8B4513; font-size: 28px; font-weight: bold; margin-bottom: 5px; }
+    #scorePopup { position: absolute; right: -100px; top: 0; font-size: 60px; color: #8B4513; opacity: 0; pointer-events: none; }
 
-    #scorePopup {
-      position: absolute;
-      right: -100px;
-      top: 0;
-      font-size: 60px;
-      color: #8B4513;
-      opacity: 0;
-      pointer-events: none;
-    }
+    .showPopup { animation: floatUp 1.2s ease-out forwards; }
+    @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-120px); } }
 
-    .showPopup {
-      animation: floatUp 1.2s ease-out forwards;
-    }
-
-@media (max-width:900px){
-  #playBtn{ position:static; width:72px; height:72px; margin-left:8px; }
-  .image-container{ width:100%; height:auto; aspect-ratio:19/13; }
-}
-  .left-panel,
-  .image-input-wrapper,
-  #stick-container{
-    width: 100%;
-  }
-
-    @keyframes floatUp {
-      0% { opacity: 1; transform: translateY(0); }
-      100% { opacity: 0; transform: translateY(-120px); }
-    }
-
+    /* ⚠️ 刪除了舊的 @media scale；手機縮放交給 JS 控制 */
 
     #gameOverOverlay {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(139, 69, 19, 0.8);
-      color: white;
-      font-size: 64px;
-      padding: 40px 80px;
-      border-radius: 20px;
-      display: none;
-      z-index: 1000;
-      text-align: center;
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background-color: rgba(139, 69, 19, 0.8); color: white; font-size: 64px;
+      padding: 40px 80px; border-radius: 20px; display: none; z-index: 1000; text-align: center;
     }
-#finishOverlay {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(139, 69, 19, 0.9);
-  color: #fff;
-  font-size: 64px;
-  padding: 40px 80px;
-  border-radius: 20px;
-  display: none;
-  z-index: 1000;
-  text-align: center;
-  max-height: none; /* ✅ 移除高度限制 */
-  overflow: visible; /* ✅ 不顯示滾動條 */
-}
-#finishOverlay .hint {
-  display: block;
-  font-size: 20px;
-  margin-top: 12px;
-  opacity: 0.9;
-}
-
+    #finishOverlay {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background-color: rgba(139, 69, 19, 0.9); color: #fff; font-size: 64px;
+      padding: 40px 80px; border-radius: 20px; display: none; z-index: 1000; text-align: center;
+      max-height: none; overflow: visible;
+    }
+    #finishOverlay .hint { display: block; font-size: 20px; margin-top: 12px; opacity: 0.9; }
 
     #tryAgainBtn {
-      display: block;
-      margin-top: 20px;
-      font-size: 24px;
-      padding: 10px 20px;
-      background-color: white;
-      color: #8B4513;
-      border: none;
-      cursor: pointer;
+      display: block; margin-top: 20px; font-size: 24px; padding: 10px 20px;
+      background-color: white; color: #8B4513; border: none; cursor: pointer;
     }
-#attemptsSummary {
-  margin-top: 16px;
-  font-size: 18px;
-  text-align: left;
-  max-height: none; /* ✅ 移除最大高度 */
-  overflow: visible; /* ✅ 不再顯示 scrollbar */
-}
 
-#attemptsSummary ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
+    #attemptsSummary { margin-top: 16px; font-size: 18px; text-align: left; max-height: none; overflow: visible; }
+    #attemptsSummary ul { list-style: none; padding: 0; margin: 0; }
+    #attemptsSummary li { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.25); }
+    #attemptsSummary .word { min-width: 120px; font-weight: 600; }
+    #attemptsSummary .attempt { opacity: 0.95; }
+    #attemptsSummary .cross-icon { font-size: 22px; color: #FF0000; }
 
-#attemptsSummary li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 0;
-  border-bottom: 1px dashed rgba(255,255,255,0.25);
-}
+    #setSelect{ display:block; margin: 0 auto 10px; text-align:center; }
 
-#attemptsSummary .word {
-  min-width: 120px;
-  font-weight: 600;
-}
+    #hintOverlay{
+      position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+      z-index: 1500; background: rgba(139, 69, 19, 0.8); pointer-events: auto;
+    }
+    .hint-card{
+      position: relative; width: 800px; max-width: 90vw; aspect-ratio: 4 / 3;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #hintText{
+      position: absolute; left: 50%; transform: translateX(-50%); width: 88%;
+      color: rgb(139, 69, 19); -webkit-text-stroke: 0.5px rgba(0,0,0,0.25);
+      font-size: clamp(10px, 2.2vw, 25px); line-height: 1.35; text-align: center; z-index: 2;
+    }
+    .hint-actions{
+      position: absolute; left: 6%; transform: translateX(-45%); bottom: 40%;
+      display: flex; gap: 24px; align-items: center; justify-content: center; z-index: 2;
+    }
+    .hint-btn{ background: none; border: none; padding: 0; cursor: pointer; }
+    .hint-btn img{ width: 28px; height: auto; filter: drop-shadow(0 0 2px rgba(0,0,0,0.3)); transition: filter 0.25s ease; }
+    .hint-btn:hover img { transform: rotate(90deg) scale(1.2); filter: brightness(1.2); }
+    .hint-bg{ position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 1; }
 
-#attemptsSummary .attempt {
-  opacity: 0.95;
-}
+    .image-container { position: relative; width: 570px; height: 390px; }
 
-#attemptsSummary .cross-icon {
-  font-size: 22px;
-  color: #FF0000; /* 同你顯示答案用的一致紅色 */
-}
+    #blankImage{ position:absolute; inset:0; background:#fff; display:none; }
 
-
-@keyframes starFlash {
-  0% { opacity: 1; transform: scale(1); }
-  50% { transform: scale(1.5); }
-  100% { opacity: 0; transform: scale(0); }
-}
-
-.star-popup {
-  position: absolute;
-  font-size: 40px;
-  color: gold;
-  animation: starFlash 1.2s ease-out forwards;
-  pointer-events: none;
-  z-index: 10;
-}
-
-/* 讓 Set 選單永遠可點（提示彈出時仍可切 Set） */
-#setSelect{
-  display:block;
-  margin: 0 auto 10px;   /* 水平置中 + 原本落margin */
-  text-align:center;     /* 某啲平台會令 option 文案更居中 */
-}
-
-
-/* 1) 全畫面 90% 啡色遮罩 */
-#hintOverlay {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(139, 69, 19, 0.85);
-  z-index: 3000;
-}
-.hint-card {
-  position: relative;                /* 子層用佢定位 */
-  width: min(95vw, 900px);
-  aspect-ratio: 16 / 6;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 3100;
-}
-#hintText {
-  position: absolute;
-  top: 50%;                        /* 垂直中心 */
-  left: 50%;                       /* 水平中心 */
-  transform: translate(-50%, -50%);/* 同時校正中心點 */
-  width: 80%;                      /* 文字區域寬度（可調） */
-  text-align: center;              /* 文字水平置中 */
-  color: #5a3e2b;                  /* 啡色字 */
-  font-size: clamp(18px, 2.6vw, 28px);
-  line-height: 1.5;
-  z-index: 2;                      /* 顯示在 hints.png 上 */
-  -webkit-text-stroke: 0;
-}
-
-/* 4) 兩個按鈕細一倍、同樣重疊在圖上、偏低位置 */
-.hint-actions {
-  position: absolute;
-  left: 25px;
-  bottom: 90px;
-  z-index: 3;               /* 最高層 */
-}
-
-#soundBtn[disabled] { opacity: .4; pointer-events: none; }
-
-.hint-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-
-.hint-btn img {
-  display: block;
-  width: 40px;
-  height: auto;
-  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.5));
-  transition: transform 0.2s ease;
-}
-
-.hint-btn:hover img {
-  transform: scale(1.1);
-}
-
-.hint-btn.fallback-x::before{
-  content:"✕";
-  font-size:46px;
-  line-height:1;
-  color:#8B4513;          /* 深啡色 */
-  text-shadow: 0 0 2px rgba(0,0,0,.35);
-}
-
-
-.hint-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  z-index: 1;               /* 最底層 */
-  display: block;
-  pointer-events: none;     /* 保證 cross 可點擊 */
-}
-
-
-
-.image-container { position: relative; }
-
-#blankImage{
-  position:absolute;
-  inset:0;
-  background:#fff;        /* 白色塊 */
-  display:none;           /* 平時收起，未揀 set 先顯示 */
-}
-
-
-#lessonLabel {
-  font-size: 24px;
-  font-weight: bold;
-  color: #5a3e2b;
-  text-align: center;
-  margin-top: 10px;
-}
-/* 直向手機版：底部一行（左：Stick；右：錯字） */
-.mobile-bottom {
-  display: none;           /* 預設關閉，只在直向手機開 */
-  align-items: flex-start;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-@media (orientation: portrait) and (max-width: 820px) {
-  /* 打開底部一行 */
-  .mobile-bottom { display: flex; }
-
-  /* 左邊 Stick、右邊錯字各佔一半 */
-  .mobile-bottom #stick-container { flex: 1 1 50%; }
-  .mobile-bottom #attemptBox      { flex: 1 1 50%; }
-
-  /* 手機直向：鍵盤改為每行 9 粒 */
-  /* 這裡只作保底，JS 亦會在移動時 set 'repeat(9,1fr)' */
-  .keyboard {
-    display: grid !important;
-    grid-template-columns: repeat(9, 1fr) !important;
-    gap: 6px;
-    width: 100% !important;
-  }
-
-  .keyboard button {
-    height: 42px;
-    font-size: 18px;
-  }
-}
-
-#mobileKeyboardSlot { width: 100%; }
-#mobileKeyboardSlot .keyboard { width: 100% !important; }
-
-
-#wordImage{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;          /* 有圖時顯示 */
-}
-#lessonLabel {
-  font-size: 24px;
-  font-weight: bold;
-  color: #5a3e2b;
-}
-.label-row{ position: relative; display:flex; align-items:center; gap:8px; }
-#playBtn{
-  position:absolute; right:-60px; top:20px;
-  width:90px; height:90px; border-radius:50%;
-  background: linear-gradient(135deg,#ff9f1c,#ff3b30);
-  color:#fff; font-size:26px; font-weight:700;
-  border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
-  transition: transform .15s ease, filter .2s ease; z-index:2000; box-shadow:none;
-}
-#playBtn:hover{ transform:scale(1.05); filter:brightness(1.1); }
-/* 手機時改回不蓋住標題 */
-
-/* 背景鋪滿，不留白（行動裝置高度正確） */
-html, body { height: 100%; }
-body{
-  min-height: 100svh;
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
-}
-
-/* 手機直向：單欄、left-panel 搬落去輸入欄下面，Stick+錯字在更下面（左右） */
-@media (orientation: portrait) and (max-width: 820px){
-  .game-row{ grid-template-columns: 1fr; }
-
-  /* left-panel 在手機直向填滿闊度 */
-  .left-panel{ width: 100% !important; }
-
-  /* left-panel 入面兩個 keyboard 改為 9 粒一行，自動分 3–4 行 */
-  .left-panel .keyboard{
-    display: grid !important;
-    grid-template-columns: repeat(9, 1fr) !important;
-    gap: 6px;
-    width: 100% !important;
-  }
-  .left-panel .keyboard button{
-    height: 44px;
-    font-size: 18px;
-  }
-
-  /* Stick + 錯字：鍵盤之下，左右排列 */
-  .mobile-bottom{
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-top: 12px;
-  }
-  .mobile-bottom #stick-container{ flex: 1 1 50%; }
-  .mobile-bottom #attemptBox{      flex: 1 1 50%; }
-
-  /* 圖片區少少上邊距收緊 */
-  .image-input-wrapper{ margin-top: 10px; }
-}
-
-
-
+    .label-row {
+      position: relative; display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-bottom: 8px;
+    }
+    #playBtn {
+      position: absolute; right: -60px; top: 20px; width: 90px; height: 90px; border-radius: 50%;
+      background: linear-gradient(135deg, #ff9f1c, #ff3b30); color: #fff; font-size: 26px; font-weight: bold;
+      border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s ease, filter 0.2s ease; z-index: 2000; box-shadow: none;
+    }
+    #playBtn:hover { transform: scale(1.05); filter: brightness(1.1); }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="game-row">
-<div class="left-panel">
-<div class="label-row">
-  <div id="lessonLabel">Lesson 7-1</div>
-  <button id="playBtn" onclick="handlePlay()">Play</button>
-</div>
-  <div class="label">Consonants44444</div>
-        <div class="keyboard" id="consonantKeys"></div>
-        <div class="label">Vowels</div>
-        <div class="keyboard" id="vowelKeys"></div>
+  <!-- ★ 新增外層，包住整個遊戲盒（固定 1000×720） -->
+  <div class="stage-outer">
+    <div class="container">
+      <div class="game-row">
+        <div class="left-panel">
+          <div class="label-row">
+            <div id="lessonLabel">Lesson 7-2</div>
+            <button id="playBtn" onclick="handlePlay()">Play</button>
+          </div>
+          <div class="label">Consonants</div>
+          <div class="keyboard" id="consonantKeys"></div>
+          <div class="label">Vowels</div>
+          <div class="keyboard" id="vowelKeys"></div>
+        </div>
+
+        <div class="image-input-wrapper">
+          <div class="image-container">
+            <div id="blankImage"></div>
+            <img id="wordImage" src="" alt="">
+            <div id="wordHint" class="word-hint"></div>
+            <button id="soundBtn" onclick="playAudio()">
+              <img src="speaker.png" alt="Play Sound">
+            </button>
+          </div>
+
+          <div class="input-row">
+            <div class="input-container" id="inputContainer">
+              <input type="text" id="inputBox" readonly />
+              <div id="scorePopup">+10</div>
+            </div>
+          </div>
+
+          <button id="submitBtn" onclick="submitAnswer()">submit</button>
+        </div>
+
+        <div id="stick-container">
+          <div id="finishOverlay">
+            Finish!
+            <div id="attemptsSummary"></div>
+          </div>
+          <img id="stick" src="stick1.png" alt="stickman">
+          <div class="attempt-box" id="attemptBox">
+            <ul id="attemptList"></ul>
+          </div>
+        </div>
       </div>
 
-<div class="image-input-wrapper">
-  <div class="image-container">
-    <div id="blankImage"></div>
-    <img id="wordImage" src="" alt="">
-    <div id="wordHint" class="word-hint"></div>
-    <button id="soundBtn" onclick="playAudio()">
-      <img src="speaker.png" alt="Play Sound">
-    </button>
-  </div>
-
-  <div class="input-row">
-    <div class="input-container" id="inputContainer">
-      <input type="text" id="inputBox" readonly />
-      <div id="scorePopup">+10</div>
+      <audio id="audio" src=""></audio>
+      <audio id="winSound" src="win.mp3"></audio>
+      <audio id="clickSound" src="click.mp3"></audio>
+      <audio id="missSound" src="scratch.mp3"></audio>
+      <audio id="screamSound" src="scream.mp3"></audio>
     </div>
   </div>
 
-  <!-- 最上：submit -->
-  <button id="submitBtn" onclick="submitAnswer()">submit</button>
-
-  <!-- 中間：keyboard 會搬入嚟 -->
-  <div id="mobileKeyboardSlot"></div>
-
-  <!-- 最下：Stick + 錯字 會搬入嚟（左右排） -->
-  <div id="mobileBottomRow" class="mobile-bottom"></div>
-</div>
-
-
-      <div id="stick-container">
-
-<!-- 新增 Finish Overlay -->
-<div id="finishOverlay">
-  Finish!
-    <div id="attemptsSummary"></div>
-</div>
-
-<img id="stick" src="stick1.png" alt="stickman">
- 
-<div class="attempt-box" id="attemptBox">
-  <ul id="attemptList"></ul>
-</div>
+  <!-- Hint Overlay -->
+  <div id="hintOverlay">
+    <div class="hint-card">
+      <img class="hint-bg" src="hints.png" alt="hints">
+      <div id="hintText"></div>
+      <div class="hint-actions">
+        <button class="hint-btn" id="hintCloseBtn" aria-label="Close hint">
+          <img src="cross.png" alt="Close">
+        </button>
       </div>
     </div>
-
-    <audio id="audio" src=""></audio>
-	<audio id="winSound" src="win.mp3"></audio>
-    <audio id="clickSound" src="click.mp3"></audio>
-    <audio id="missSound" src="scratch.mp3"></audio>
-    <audio id="screamSound" src="scream.mp3"></audio>
+    <audio id="hintAudio"></audio>
   </div>
-<!-- Hint Overlay -->
-<div id="hintOverlay">
-  <div class="hint-card">
-    <img class="hint-bg" src="hints.png" alt="hints">
-    <div id="hintText"></div>
-    <div class="hint-actions">
-      <button class="hint-btn" id="hintCloseBtn" aria-label="Close hint">
-        <img src="cross.png" alt="Close">
-      </button>
-    </div>
-  </div>
-  <audio id="hintAudio"></audio>
-</div>
-<!-- 專用來播提示音的 audio（不影響你本來的 #audio） -->
-
 
   <script>
-
-
- const wordSets = {
-  
-1: [
-    { 
-      word: "cub",      hint: {
-        text: "如果/k/ 在前是 c ,/k/ 在後是 k <br>因為國王好老了在後面慢慢行, 貓就在前面跑<br> e.g.  cook, crook",
-        audio: "audio/cub_hints.mp3"
-      }
-    },
-    { word: "gun" },
-    { word: "mop" },
-    { word: "sim" }, 
-    { word: "ted" },
-    { word: "rag" },
-    { word: "cot" },
-  ],
-
-  2: [
-    { word: "silk", disabled: ["c"], hint: {
-        text: "一個音的字, 如果聽到/l/音,<br> 是 l 不是 o , 因為 o 是讀/o/<br>e.g. milk, sell",
-        audio: "audio/silk_hints.mp3"
-      }
- },
-    { word: "loft" },
-    { word: "vent" },
-    { word: "melt" },
-    { word: "gasp" },
-    { word: "busk" },
-  ],
-
-  3: [
-    { word: "drop", hint: {
-        text: "d r 讀快些好像 j <br>j 比較清和簡單, d r 聽上來有些變化的<br>e.g. jam 同 dram ",
-        audio: "audio/drop_hints.mp3"
-      }
- },
-    { word: "trim", hint: {
-        text: "t r 讀快些拼出來好像 ch<br>ch 比較清和簡單, t r 聽上來有些變化的<br>e.g. train 同 chain ",
-        audio: "audio/trim_hints.mp3"
-      }
-},
-    { word: "flip" },
-    { word: "drug" },
-    { word: "blog" },
-    { word: "trap" },
-    { word: "crab" },
-    { word: "brim" },
-  ],
-  4: [
-       { word: "truck",hint: {
-        text: "a e i o u 後有 /k/音, 國王帶貓跟小朋友玩,<br>所以是 ck, 小朋友後盡量多些人<br>e.g. lock, duck ",
-        audio: "audio/truck_hints.mp3"
-      }
-},
-    { word: "dock" },
-    { word: "lack" },
-    { word: "yuck" },
-    { word: "flock" },
-    { word: "slack" },
-  ],
-
-  5: [
-    { word: "mesh" },
-    { word: "shock" },
-    { word: "slosh" },
-    { word: "shack" },
-  ],
-  6: [
-    { word: "mulch" },
-    { word: "pitch" },
-    { word: "etch" },
-    { word: "chock" },
-  ],
-  7: [
-    { word: "cloth", disabled: ["f"] },
-    { word: "thrum", disabled: ["f"] },
-    { word: "broth", disabled: ["f"] },
-  ],
-  8: [
-    { word: "scab", hint: {
-        text: "sg, sb, sd 不會在一起<br>要用 sc, sp, st 蛇嚇到人的故事取代<br>e.g stop, spin, scan ",
-        audio: "audio/scab_hints.mp3"
-      }
-},
-    { word: "stench" },
-    { word: "stitch" },
-    { word: "span" },
-    { word: "scotch" },
-    { word: "splash" },
-  ],
-  9: [
-    { word: "wig", disabled: ["e"] },
-    { word: "fix" },
-    { word: "slick" },
-    { word: "fig", disabled: ["e"] },
-    { word: "critic", hint: {
-        text: "之前講過aeiou後如有/k/音是ck<br>但如果該字有兩個音節以上,尾音是ic 就不用加k<br>e.g music, comic ",
-        audio: "audio/critic_hints.mp3"
-      }
-    },
- { word: "public" },
-  ],
- 
-  10: [
-    { word: "chime", disabled: ["g"] },
-    { word: "wipe" },
-    { word: "clade", disabled: ["i"] },
-    { word: "spine", disabled: ["g"] },
-    { word: "gripe" },
-    { word: "gape", disabled: ["i"] },
-    { word: "steve", disabled: ["a","i"] },
-    { word: "mule", disabled: ["w"] },
-    { word: "dose", disabled: ["a","w"] },
-    { word: "fuse", disabled: ["w"]  },
-    { word: "phase", disabled: ["f","i"] },
-  ],
- 11: [
-    { word: "think", disabled: ["f"] },
-    { word: "bring" },
-    { word: "cling" },
-    { word: "stink" },
-    { word: "shrink" },
-    { word: "drink" },
-  ],
-  12: [
-    { word: "quake", disabled: ["i"], hint: {
-        text: "如果聽到/kw/ 音是qu, 沒有kw的",
-        audio: "audio/quake_hints.mp3"
-      }
- },
-    { word: "quench" },
-    { word: "quick" },
-    { word: "quote", disabled: ["w","a"]  },
-    { word: "quite", disabled: ["g"]  },
-  ],
-
-  13: [
-    { word: "sheaf", disabled: ["i"] },
-    { word: "flea", disabled: ["i"] },
-    { word: "thief", disabled: ["a"] },
-    { word: "sweat", hint: {
-        text: "如果聽到/e/ 音, 除e外還有ea",
-        audio: "audio/sweat_hints.mp3"
-      }
- },
-    { word: "death" },
-    { word: "preen", disabled: ["a","i"] },
-    { word: "shield", disabled: ["a"]  },
-    { word: "chief", disabled: ["a"] },
-    { word: "flue", disabled: ["o","w"]  },
-  ],
-  14: [
-    { word: "birch", disabled: ["e","u"] },
-    { word: "derv", disabled: ["i","u"] },
-    { word: "stir", disabled: ["e","u"] },
-    { word: "thorn", disabled: ["a"] },
-    { word: "scorn", disabled: ["a"] },
-    { word: "mirth", disabled: ["e","u"] },
-    { word: "shirk", disabled: ["e","u"] },
-    { word: "quirk", disabled: ["e"] },
-  ],
-  15: [
-    { word: "stew" },
-    { word: "spew" },
-    { word: "fume", disabled: ["w"] },
-  ],
-  16: [
-    { word: "soy", hint: {
-        text: "跳高故事ai,ei,oi,ay,ey,oy 因為Ivanman不喜歡在最尾<br>放在中間是ai,ei,oi  放最尾是ay,ey,oy<br>e.g. toy,soil,play,rain",
-        audio: "audio/soy_hints.mp3"
-      }
- },
-    { word: "dray", disabled: ["e"] },
-    { word: "coil" },
-    { word: "troy" },
-    { word: "hoist" },
-    { word: "spray", disabled: ["e"] },
-    { word: "quail", disabled: ["e"] }, 
-    { word: "stain", disabled: ["e"] },
-  ],
-  17: [
-    { word: "launch", disabled: ["o","w"] },
-    { word: "prawn", disabled: ["u","l","o"] },
-    { word: "stalk", disabled: ["o","w","u"] },
-    { word: "spawn", disabled: ["l","u","o"] },
-    { word: "chalk", disabled: ["o","w","u"] },
-
-  ],
-  18: [
-    { word: "coach", disabled: ["w"] },
-    { word: "scold", disabled: ["w","a"]},
-    { word: "shoal", disabled: ["w"] },
-    { word: "blind", disabled: ["g"]  },
-    { word: "child", disabled: ["g"] },
-  ],
-  19: [
-    { word: "scoot", disabled: ["u"] },
-    { word: "drown", disabled: ["u"] },
-    { word: "crow", disabled: ["a"] },
-    { word: "broom" ,disabled: ["u"] },
-    { word: "shoot", disabled: ["u"]   },
-
-  ],
-  20: [
-    { word: "tawny", disabled: ["e","r","l","u"] },
-    { word: "foamy", disabled: ["e","w"] },
-    { word: "faintly", disabled: ["e"] },
-    { word: "shonky" ,disabled: ["e"] },
-    { word: "twirly" ,disabled: ["e","u"] },
-  ],
-  21: [
-{ word: "kerb",disabled: ["i","u"], hint: {
-        text: "之前話/k/音在前是c,在後是k<br>但如果第2個英文字母係i,y,e, c會變咗/s/<br>所以前面的/k/音就要用k<br>e.g. kiss , kettle",
-        audio: "audio/kerb_hints.mp3"
-      }
- },
-    { word: "king" },
-    { word: "kid" },
-    { word: "kick" },
-    { word: "keen", disabled: ["a","i"]  },
-    { word: "kite",disabled: ["g"] },
-  ],
-  22: [
-    { word: "victor", disabled: ["e","a"] },
-    { word: "orca" , disabled: ["w","l","u"]},
-    { word: "mower", disabled: ["a"] },
-    { word: "dower", disabled: ["u","a"] },
-    { word: "fauna", disabled: ["o","l","w","e"] },
-    { word: "shiver", disabled: ["a","o"] },
-  ],
-  23: [
-    { word: "portion", disabled: ["s","a"] },
-    { word: "fiction", disabled: ["s"] },
-    { word: "incursion", disabled: ["e","t"]  },
-    { word: "caution", disabled: ["w","r","l","s"]  },
-
-  ],
-  24: [
-    { word: "shadow", disabled: ["l"]  },
-    { word: "indigo", disabled: ["l","w"] },
-    { word: "bronco", disabled: ["l","w"] },
-    { word: "widow", disabled: ["l"] },
-    { word: "jungle" , disabled: ["o","a"]},
-    { word: "doodle", disabled: ["u","w"] },
-    { word: "beadle", disabled: ["i","w","o"] },
-    { word: "burgle", disabled: ["i","o"] },
-    { word: "travel", disabled: ["o"] },
-    { word: "coastal", disabled: ["e","w"] },
-    { word: "kernel", disabled: ["a","i","u"] },
-
-
-	],
-
-25: [
-    { word: "hospitality"},
-    { word: "calendar", disabled: ["u","o"]},
-    { word: "adventure", disabled: ["o"]},
-    { word: "disaster", disabled: ["o"]},
-    { word: "tradition", disabled: ["s","e","u"]},
-    { word: "phenomenon", disabled: ["u","f","a"]},
-    { word: "philosophy", disabled: ["u","a","e","f"]},
-  ]
-}
-
-// 中文釋義（可隨時自行增刪改）
-const meanings = {
-  // Set 1
-  cub: "幼幼獸", gun: "槍", mop: "拖把", sim: "模擬", ted: "熊", rag: "抹布", cot: "小床",
-
-  // Set 2
-  silk: "絲綢", loft: "閣樓", vent: "通風口", melt: "融化", gasp: "倒抽一口氣", busk: "街頭表演",
-
-  // Set 3
-  drop: "掉落", trim: "修剪", flip: "翻轉", drug: "藥物", blog: "部落格", trap: "陷阱",
-  crab: "螃蟹", brim: "邊緣",
-
-  // Set 4
-  truck: "貨車", dock: "碼頭", lack: "缺乏", yuck: "噁心", flock: "群", slack: "鬆弛",
-
-  // Set 5
-  mesh: "網狀物", shock: "震驚", slosh: "濺起", shack: "簡陋小屋",
-
-  // Set 6
-  mulch: "覆蓋物", pitch: "球場", etch: "蝕刻", chock: "塞住",
-
-  // Set 7
-  cloth: "布料", thrum: "低沉嗡聲", broth: "肉湯",
-
-  // Set 8
-  scab: "結痂", stench: "惡臭", stitch: "縫合", span: "跨度",
-  scotch: "蘇格蘭的", splash: "濺起",
-
-  // Set 9
-  wig: "假髮", fix: "修理", slick: "圓滑的",
-   fig: "無花果", critic: "評論家", public: "公眾/公共的",
-
-  // Set 10
-  chime: "風鈴", wipe: "擦拭", clade: "演化支", spine: "脊柱",
-  gripe: "抱怨", gape: "目瞪口呆", steve: "人名", mule: "騾子",
-  dose: "劑量", fuse: "保險絲", phase: "階段",
-
-  // Set 11
-  think: "思考", bring: "帶來", cling: "緊貼/依附", stink: "發臭", shrink: "收縮", drink: "喝/飲料",
-
-  // Set 12
-  quake: "地震", quench: "解渴", quick: "快速",
-  quote: "引述", quite: "相當",
-
-  // Set 13
-  sheaf: "一束", flea: "跳蚤", thief: "小偷", sweat: "汗水",
-  death: "死亡", preen: "整理羽毛", shield: "盾牌",
-  chief: "首領", flue: "煙道",
-
-  // Set 14
-  birch: "樺木", derv: "柴油", stir: "攪拌", thorn: "荊棘", scorn: "鄙視",
-  mirth: "歡笑", shirk: "逃避", quirk: "怪癖",
-
-  // Set 15
-  stew: "燉菜", spew: "噴出", fume: "冒煙",
-
-  // Set 16
-  soy: "大豆", dray: "運貨平板車", coil: "線圈/盤繞", troy: "特洛伊",
-  hoist: "吊起", spray: "噴霧", quail: "鵪鶉", stain: "污漬",
-
-  // Set 17
-  launch: "發射", prawn: "明蝦", stalk: "莖", spawn: "產卵",
-  chalk: "粉筆",
-
-  // Set 18
-  coach: "長途巴士", scold: "責罵", shoal: "淺灘", blind: "失明",
-  child: "孩子",
-
-  // Set 19
-  scoot: "疾走", drown: "溺水", crow: "烏鴉", broom: "掃帚", shoot: "射擊",
-
-  // Set 20
-  tawny: "黃褐色的", foamy: "起泡的", faintly: "微弱地",
-  shonky: "粗劣的", twirly: "旋轉的",
-
-  // Set 21
-  kerb: "路邊石", king: "國王", kid: "小孩", kick: "踢",
-  keen: "熱切", kite: "風箏",
-
-  // Set 22
-  victor: "勝利者", orca: "虎鯨", mower: "割草機", dower: "嫁妝", fauna: "動物群",
-  shiver: "發抖",
-
-  // Set 23
-  portion: "部分", fiction: "小說", incursion: "入侵", caution: "警示",
-
-  // Set 24
-  shadow: "影子", indigo: "靛藍色", bronco: "野馬", widow: "寡婦", jungle: "叢林",
-  doodle: "塗鴉", beadle: "教堂司事", burgle: "入室行竊", travel: "旅行",
-  coastal: "沿海的", kernel: "穀粒",
-
-  // Set 25
-  hospitality: "好客", calendar: "日曆", adventure: "冒險",
-  disaster: "災難", tradition: "傳統", phenomenon: "現象", philosophy: "哲學"
+/* =================== 你的遊戲資料與邏輯（原樣保留） =================== */
+const wordSets = {
+  1:[{word:"cub",hint:{text:"如果/k/ 在前是 c ,/k/ 在後是 k <br>因為國王好老了在後面慢慢行, 貓就在前面跑<br> e.g.  cook, crook",audio:"audio/cub_hints.mp3"}},{word:"gun"},{word:"mop"},{word:"sim"},{word:"ted"},{word:"rag"},{word:"cot"}],
+  2:[{word:"silk",disabled:["c"],hint:{text:"一個音的字, 如果聽到/l/音,<br> 是 l 不是 o , 因為 o 是讀/o/<br>e.g. milk, sell",audio:"audio/silk_hints.mp3"}},{word:"loft"},{word:"vent"},{word:"melt"},{word:"gasp"},{word:"busk"}],
+  3:[{word:"drop",hint:{text:"d r 讀快些好像 j <br>j 比較清和簡單, d r 聽上來有些變化的<br>e.g. jam 同 dram ",audio:"audio/drop_hints.mp3"}},{word:"trim",hint:{text:"t r 讀快些拼出來好像 ch<br>ch 比較清和簡單, t r 聽上來有些變化的<br>e.g. train 同 chain ",audio:"audio/trim_hints.mp3"}},{word:"flip"},{word:"drug"},{word:"blog"},{word:"trap"},{word:"crab"},{word:"brim"}],
+  4:[{word:"truck",hint:{text:"a e i o u 後有 /k/音, 國王帶貓跟小朋友玩,<br>所以是 ck, 小朋友後盡量多些人<br>e.g. lock, duck ",audio:"audio/truck_hints.mp3"}},{word:"dock"},{word:"lack"},{word:"yuck"},{word:"flock"},{word:"slack"}],
+  5:[{word:"mesh"},{word:"shock"},{word:"slosh"},{word:"shack"}],
+  6:[{word:"mulch"},{word:"pitch"},{word:"etch"},{word:"chock"}],
+  7:[{word:"cloth",disabled:["f"]},{word:"thrum",disabled:["f"]},{word:"broth",disabled:["f"]}],
+  8:[{word:"scab",hint:{text:"sg, sb, sd 不會在一起<br>要用 sc, sp, st 蛇嚇到人的故事取代<br>e.g stop, spin, scan ",audio:"audio/scab_hints.mp3"}},{word:"stench"},{word:"stitch"},{word:"span"},{word:"scotch"},{word:"splash"}],
+  9:[{word:"wig",disabled:["e"]},{word:"fix"},{word:"slick"},{word:"fig",disabled:["e"]},{word:"critic",hint:{text:"之前講過aeiou後如有/k/音是ck<br>但如果該字有兩個音節以上,尾音是ic 就不用加k<br>e.g music, comic ",audio:"audio/critic_hints.mp3"}},{word:"public"}],
+  10:[{word:"chime",disabled:["g"]},{word:"wipe"},{word:"clade",disabled:["i"]},{word:"spine",disabled:["g"]},{word:"gripe"},{word:"gape",disabled:["i"]},{word:"steve",disabled:["a","i"]},{word:"mule",disabled:["w"]},{word:"dose",disabled:["a","w"]},{word:"fuse",disabled:["w"]},{word:"phase",disabled:["f","i"]}],
+  11:[{word:"think",disabled:["f"]},{word:"bring"},{word:"cling"},{word:"stink"},{word:"shrink"},{word:"drink"}],
+  12:[{word:"quake",disabled:["i"],hint:{text:"如果聽到/kw/ 音是qu, 沒有kw的",audio:"audio/quake_hints.mp3"}},{word:"quench"},{word:"quick"},{word:"quote",disabled:["w","a"]},{word:"quite",disabled:["g"]}],
+  13:[{word:"sheaf",disabled:["i"]},{word:"flea",disabled:["i"]},{word:"thief",disabled:["a"]},{word:"sweat",hint:{text:"如果聽到/e/ 音, 除e外還有ea",audio:"audio/sweat_hints.mp3"}},{word:"death"},{word:"preen",disabled:["a","i"]},{word:"shield",disabled:["a"]},{word:"chief",disabled:["a"]},{word:"flue",disabled:["o","w"]}],
+  14:[{word:"birch",disabled:["e","u"]},{word:"derv",disabled:["i","u"]},{word:"stir",disabled:["e","u"]},{word:"thorn",disabled:["a"]},{word:"scorn",disabled:["a"]},{word:"mirth",disabled:["e","u"]},{word:"shirk",disabled:["e","u"]},{word:"quirk",disabled:["e"]}],
+  15:[{word:"stew"},{word:"spew"},{word:"fume",disabled:["w"]}],
+  16:[{word:"soy",hint:{text:"跳高故事ai,ei,oi,ay,ey,oy 因為Ivanman不喜歡在最尾<br>放在中間是ai,ei,oi  放最尾是ay,ey,oy<br>e.g. toy,soil,play,rain",audio:"audio/soy_hints.mp3"}},{word:"dray",disabled:["e"]},{word:"coil"},{word:"troy"},{word:"hoist"},{word:"spray",disabled:["e"]},{word:"quail",disabled:["e"]},{word:"stain",disabled:["e"]}],
+  17:[{word:"launch",disabled:["o","w"]},{word:"prawn",disabled:["u","l","o"]},{word:"stalk",disabled:["o","w","u"]},{word:"spawn",disabled:["l","u","o"]},{word:"chalk",disabled:["o","w","u"]}],
+  18:[{word:"coach",disabled:["w"]},{word:"scold",disabled:["w","a"]},{word:"shoal",disabled:["w"]},{word:"blind",disabled:["g"]},{word:"child",disabled:["g"]}],
+  19:[{word:"scoot",disabled:["u"]},{word:"drown",disabled:["u"]},{word:"crow",disabled:["a"]},{word:"broom",disabled:["u"]},{word:"shoot",disabled:["u"]}],
+  20:[{word:"tawny",disabled:["e","r","l","u"]},{word:"foamy",disabled:["e","w"]},{word:"faintly",disabled:["e"]},{word:"shonky",disabled:["e"]},{word:"twirly",disabled:["e","u"]}],
+  21:[{word:"kerb",disabled:["i","u"],hint:{text:"之前話/k/音在前是c,在後是k<br>但如果第2個英文字母係i,y,e, c會變咗/s/<br>所以前面的/k/音就要用k<br>e.g. kiss , kettle",audio:"audio/kerb_hints.mp3"}},{word:"king"},{word:"kid"},{word:"kick"},{word:"keen",disabled:["a","i"]},{word:"kite",disabled:["g"]}],
+  22:[{word:"victor",disabled:["e","a"]},{word:"orca",disabled:["w","l","u"]},{word:"mower",disabled:["a"]},{word:"dower",disabled:["u","a"]},{word:"fauna",disabled:["o","l","w","e"]},{word:"shiver",disabled:["a","o"]}],
+  23:[{word:"portion",disabled:["s","a"]},{word:"fiction",disabled:["s"]},{word:"incursion",disabled:["e","t"]},{word:"caution",disabled:["w","r","l","s"]}],
+  24:[{word:"shadow",disabled:["l"]},{word:"indigo",disabled:["l","w"]},{word:"bronco",disabled:["l","w"]},{word:"widow",disabled:["l"]},{word:"jungle",disabled:["o","a"]},{word:"doodle",disabled:["u","w"]},{word:"beadle",disabled:["i","w","o"]},{word:"burgle",disabled:["i","o"]},{word:"travel",disabled:["o"]},{word:"coastal",disabled:["e","w"]},{word:"kernel",disabled:["a","i","u"]}],
+  25:[{word:"hospitality"},{word:"calendar",disabled:["u","o"]},{word:"adventure",disabled:["o"]},{word:"disaster",disabled:["o"]},{word:"tradition",disabled:["s","e","u"]},{word:"phenomenon",disabled:["u","f","a"]},{word:"philosophy",disabled:["u","a","e","f"]}]
 };
 
-let currentSet = null; // ⬅️ 由 null 開始
-let hintPlayTimer = null; 
-const BLANK_IMG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/axwQX0AAAAASUVORK5CYII=';
-let audioDelayTimer = null; // ⬅️ 用嚟做 2 秒延遲
-    let currentIndex = 0;
-    let score = 0;
-    let mistakeCount = 0;
-    let gameOver = false;
-    let useSplitInputs = false;
-let wrongAttempts = 0;
-let awaitingNext = false; // 錯滿6次後，等用家按 Next
-let attemptsLog = []; // 紀錄每題的嘗試次數
-let nextAudioIndex = 1; // 下一次要播嘅編號（1 或 2）
-let wrongGuesses = []; // 當前題目所有錯誤提交（字符串）
-let isHintOpen = false;  // 提示是否打開
-let firstPlayRequired = true; 
-let playStarted = false;
+const meanings = { /* ——— 你的 meanings 物件，原樣保留 ——— */ 
+  cub:"幼獸",gun:"槍",mop:"拖把",sim:"模擬",ted:"熊",rag:"抹布",cot:"小床",
+  silk:"絲綢",loft:"閣樓",vent:"通風口",melt:"融化",gasp:"倒抽一口氣",busk:"街頭表演",
+  drop:"掉落",trim:"修剪",flip:"翻轉",drug:"藥物",blog:"部落格",trap:"陷阱",crab:"螃蟹",brim:"邊緣",
+  truck:"貨車",dock:"碼頭",lack:"缺乏",yuck:"噁心",flock:"群",slack:"鬆弛",
+  mesh:"網狀物",shock:"震驚",slosh:"濺起",shack:"簡陋小屋",
+  mulch:"覆蓋物",pitch:"球場",etch:"蝕刻",chock:"塞住",
+  cloth:"布料",thrum:"低沉嗡聲",broth:"肉湯",
+  scab:"結痂",stench:"惡臭",stitch:"縫合",span:"跨度",scotch:"蘇格蘭的",splash:"濺起",
+  wig:"假髮",fix:"修理",slick:"圓滑的",fig:"無花果",critic:"評論家",public:"公眾/公共的",
+  chime:"風鈴",wipe:"擦拭",clade:"演化支",spine:"脊柱",gripe:"抱怨",gape:"目瞪口呆",steve:"人名",mule:"騾子",dose:"劑量",fuse:"保險絲",phase:"階段",
+  think:"思考",bring:"帶來",cling:"緊貼/依附",stink:"發臭",shrink:"收縮",drink:"喝/飲料",
+  quake:"地震",quench:"解渴",quick:"快速",quote:"引述",quite:"相當",
+  sheaf:"一束",flea:"跳蚤",thief:"小偷",sweat:"汗水",death:"死亡",preen:"整理羽毛",shield:"盾牌",chief:"首領",flue:"煙道",
+  birch:"樺木",derv:"柴油",stir:"攪拌",thorn:"荊棘",scorn:"鄙視",mirth:"歡笑",shirk:"逃避",quirk:"怪癖",
+  stew:"燉菜",spew:"噴出",fume:"冒煙",
+  soy:"大豆",dray:"運貨平板車",coil:"線圈/盤繞",troy:"特洛伊",hoist:"吊起",spray:"噴霧",quail:"鵪鶉",stain:"污漬",
+  launch:"發射",prawn:"明蝦",stalk:"莖",spawn:"產卵",chalk:"粉筆",
+  coach:"長途巴士",scold:"責罵",shoal:"淺灘",blind:"失明",child:"孩子",
+  scoot:"疾走",drown:"溺水",crow:"烏鴉",broom:"掃帚",shoot:"射擊",
+  tawny:"黃褐色的",foamy:"起泡的",faintly:"微弱地",shonky:"粗劣的",twirly:"旋轉的",
+  kerb:"路邊石",king:"國王",kid:"小孩",kick:"踢",keen:"熱切",kite:"風箏",
+  victor:"勝利者",orca:"虎鯨",mower:"割草機",dower:"嫁妝",fauna:"動物群",shiver:"發抖",
+  portion:"部分",fiction:"小說",incursion:"入侵",caution:"警示",
+  shadow:"影子",indigo:"靛藍色",bronco:"野馬",widow:"寡婦",jungle:"叢林",doodle:"塗鴉",beadle:"教堂司事",burgle:"入室行竊",travel:"旅行",coastal:"沿海的",kernel:"穀粒",
+  hospitality:"好客",calendar:"日曆",adventure:"冒險",disaster:"災難",tradition:"傳統",phenomenon:"現象",philosophy:"哲學"
+};
 
+let currentSet = null;
+let hintPlayTimer = null;
+const BLANK_IMG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/axwQX0AAAAASUVORK5CYII=';
+let audioDelayTimer = null;
+let currentIndex = 0, score = 0, mistakeCount = 0, gameOver = false, useSplitInputs = false;
+let wrongAttempts = 0, awaitingNext = false, attemptsLog = [], nextAudioIndex = 1;
+let wrongGuesses = [], isHintOpen = false, firstPlayRequired = true, playStarted = false;
 
 function initGame() {
   const consonants = ['b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','y','z'];
   const vowels = ['a','e','i','o','u'];
-
   const consonantContainer = document.getElementById("consonantKeys");
   const vowelContainer = document.getElementById("vowelKeys");
   [consonantContainer, vowelContainer].forEach(c => c.innerHTML = '');
-
   for (let i = 0; i < consonants.length; i += 3) {
     consonants.slice(i, i + 3).forEach(ch => consonantContainer.appendChild(createButton(ch)));
   }
@@ -1094,52 +385,30 @@ function initGame() {
       vowelContainer.appendChild(btn);
     });
   });
-currentSet = null;
-  // 一開始唔載任何 set，顯示白畫面
+  currentSet = null;
   setBlankState();
-// 調低「錯誤刮聲」音量（0~1）
-const miss = document.getElementById('missSound');
-if (miss) miss.volume = 0.25;   // 例如 25% 音量
-// 🔒 未 Play 前禁用 Speaker（視覺上也禁用）
-  const sp = document.getElementById('soundBtn');
-  if (sp) sp.disabled = true;
+  const miss = document.getElementById('missSound'); if (miss) miss.volume = 0.25;
 }
 
-    function createButton(char) {
+function createButton(char) {
   const btn = document.createElement("button");
-  btn.textContent = char;
-  btn.dataset.letter = char; 
+  btn.textContent = char; btn.dataset.letter = char;
   btn.onclick = () => {
-if (!playStarted) return; // 未按 Play 禁止輸入
-if (isHintOpen) return;
-
-    if (gameOver) return;
+    if (!playStarted || isHintOpen || gameOver) return;
     document.getElementById("clickSound").play();
-
     if (!useSplitInputs) {
       const input = document.getElementById("inputBox");
-      if (char === '←') {
-        input.value = input.value.slice(0, -1);
-      } else {
-        input.value += char;
-      }
+      if (char === '←') input.value = input.value.slice(0, -1);
+      else input.value += char;
     } else {
       const inputs = document.querySelectorAll(".input-box");
       if (char === '←') {
-        // 從右至左找最後一格未鎖定並有字嘅
         for (let i = inputs.length - 1; i >= 0; i--) {
-          if (!inputs[i].classList.contains("locked") && inputs[i].value) {
-            inputs[i].value = '';
-            break;
-          }
+          if (!inputs[i].classList.contains("locked") && inputs[i].value) { inputs[i].value = ''; break; }
         }
       } else {
-        // 填入第一個未鎖定且未填字的格
         for (let i = 0; i < inputs.length; i++) {
-          if (!inputs[i].classList.contains("locked") && !inputs[i].value) {
-            inputs[i].value = char;
-            break;
-          }
+          if (!inputs[i].classList.contains("locked") && !inputs[i].value) { inputs[i].value = char; break; }
         }
       }
     }
@@ -1147,41 +416,23 @@ if (isHintOpen) return;
   return btn;
 }
 
-
 function switchSet(setNum){
-  // 揀返 placeholder（空值）→ 回到透明狀態
   if (!setNum){
-    currentSet = null;
-    hideHint();      // 清提示 & 停 hint 延時
-    setBlankState();
-    return;
+    currentSet = null; hideHint(); setBlankState(); return;
   }
-
-  hideHint();  // 換 set 時順便收起提示
-
-  // 收起 finish
-  const overlay = document.getElementById('finishOverlay');
-  if (overlay) overlay.style.display = 'none';
-  const summary = document.getElementById('attemptsSummary');
-  if (summary) summary.innerHTML = '';
-
-  // 還原 submit
+  hideHint();
+  const overlay = document.getElementById('finishOverlay'); if (overlay) overlay.style.display = 'none';
+  const summary = document.getElementById('attemptsSummary'); if (summary) summary.innerHTML = '';
   const btn = document.getElementById('submitBtn');
   if (btn){ btn.textContent = 'submit'; btn.style.backgroundColor = '#20B2AA'; btn.onclick = submitAnswer; }
-
   wrongGuesses = []; renderAttemptsBox();
 
   currentSet = parseInt(setNum, 10);
-  currentIndex = 0;
-  mistakeCount = 0;
-  wrongAttempts = 0;
-  useSplitInputs = false;
-  gameOver = false;
-
+  currentIndex = 0; mistakeCount = 0; wrongAttempts = 0; useSplitInputs = false; gameOver = false;
   attemptsLog = new Array(wordSets[currentSet].length).fill(null);
 
   updateStickImage(true);
-  updateWord();  // 會自動顯示該字圖
+  updateWord();
   resetInput(wordSets[currentSet][currentIndex].word.length);
 
   const popup = document.getElementById("scorePopup");
@@ -1194,281 +445,150 @@ function updateWord() {
   const hintBox = document.getElementById("wordHint");
   const blank = document.getElementById("blankImage");
 
-  // 先還原所有鍵（防止上一題的禁用殘留）
   enableAllKeys();
 
-  // 未揀 set：顯示白板、不載圖、不顯示角標
   if (!wordObj) {
-    img.src = "";
-    img.classList.add("placeholder");
-    img.style.display = "none";
+    img.src = ""; img.classList.add("placeholder"); img.style.display = "none";
     if (blank) blank.style.display = "block";
     if (hintBox) hintBox.style.display = "none";
     return;
   }
 
-  // 已揀 set：載圖、收起白板
-  img.classList.remove("placeholder");
-  img.style.display = "block";
+  img.classList.remove("placeholder"); img.style.display = "block";
   if (blank) blank.style.display = "none";
   img.src = `images/${wordObj.word}.png`;
 
-  // 套用本題要禁用的字母
-  if (Array.isArray(wordObj.disabled) && wordObj.disabled.length > 0) {
-    applyDisabledLetters(wordObj.disabled);
-  }
+  if (Array.isArray(wordObj.disabled) && wordObj.disabled.length > 0) applyDisabledLetters(wordObj.disabled);
 
-  // 左下角中文
-// 左下角中文 + 顯示題數
-const zh = (wordObj.meaning) || meanings[wordObj.word];
-if (hintBox) {
-  const total = wordSets[currentSet]?.length || 0;
-  const current = currentIndex + 1;
-
-  if (zh) {
-    // ✅ 顯示「1/7 幼獸」這類格式，中間留一格空位
-    hintBox.textContent = `${current}/${total}  ${zh}`;
-    hintBox.style.display = "block";
-  } else {
-    // 即使冇中文解釋，也顯示進度
-    hintBox.textContent = `${current}/${total}`;
+  const zh = (wordObj.meaning) || meanings[wordObj.word];
+  if (hintBox) {
+    const total = wordSets[currentSet]?.length || 0;
+    const current = currentIndex + 1;
+    hintBox.textContent = zh ? `${current}/${total}  ${zh}` : `${current}/${total}`;
     hintBox.style.display = "block";
   }
+
+  if (wordObj.hint) {
+    if (firstPlayRequired && currentIndex === 0) hideHint(); else showHint(wordObj.hint);
+  } else hideHint();
 }
-
-  // 有教學提示就顯示，冇就收起
-// —— 有教學提示 —— //
-if (wordObj.hint) {
-  // 只在「第一個字 + 未按Play」時，不自動開提示
-  if (firstPlayRequired && currentIndex === 0) {
-    hideHint();
-  } else {
-    showHint(wordObj.hint); // 第2個開始（或已按Play）就自動顯示＋播放
-  }
-} else {
-  hideHint();
-}
-}
-
-
-
 
 let isTransitioning = false;
-
 function showGreenTick() {
   let tick = document.getElementById('bigTick');
   const input = document.getElementById('inputContainer');
-
   if (!tick) {
     tick = document.createElement('span');
-    tick.id = 'bigTick';
-    tick.className = 'big-tick';
-    tick.textContent = '✓';
-    input.style.position = 'relative';
-    input.appendChild(tick);
+    tick.id = 'bigTick'; tick.className = 'big-tick'; tick.textContent = '✓';
+    input.style.position = 'relative'; input.appendChild(tick);
   }
-
-  // 📍 把 tick 定位在輸入框右邊
-  tick.style.right = '-80px'; // 控制距離，可微調
-  tick.style.top = '40px';    // 大約與字母平行，可微調
-
+  tick.style.right = '-80px'; tick.style.top = '40px';
   requestAnimationFrame(() => tick.classList.add('show'));
 }
-
-function hideGreenTick() {
-  const tick = document.getElementById('bigTick');
-  if (tick) tick.classList.remove('show');
-}
+function hideGreenTick(){ const tick = document.getElementById('bigTick'); if (tick) tick.classList.remove('show'); }
 
 function playAudio() {
-  if (!playStarted) return; // 未按 Play 禁止播聲
-  if (isHintOpen) return;
-  const word = wordSets[currentSet]?.[currentIndex]?.word;
-  if (!word) return;
-
-  const audioEl = document.getElementById("audio");
-  if (!audioEl) return;
-
+  if (!playStarted || isHintOpen) return;
+  const word = wordSets[currentSet]?.[currentIndex]?.word; if (!word) return;
+  const audioEl = document.getElementById("audio"); if (!audioEl) return;
   try{
-    audioEl.src = `audio/${word}${nextAudioIndex}.mp3`; // 1 / 2 檔交替
-    audioEl.currentTime = 0;
-    audioEl.play();
+    audioEl.src = `audio/${word}${nextAudioIndex}.mp3`;
+    audioEl.currentTime = 0; audioEl.play();
     nextAudioIndex = (nextAudioIndex === 1) ? 2 : 1;
   }catch(e){}
 }
 
-
-
 function submitAnswer() {
-  if (gameOver) return;
-if (isHintOpen) return;
+  if (gameOver || isHintOpen) return;
 
   const setWords = wordSets[currentSet];
   const correctWord = setWords[currentIndex].word;
-
   let guess = '';
 
-  // 取得玩家輸入
   if (!useSplitInputs) {
     document.getElementById("clickSound").play();
     const input = document.getElementById("inputBox").value.toLowerCase();
-    if (!input) return;   // 單格時空白就唔理
-    guess = input;
+    if (!input) return; guess = input;
   } else {
     document.getElementById("clickSound").play();
-
     const inputs = document.querySelectorAll(".input-box");
     const values = Array.from(inputs).map(inp => (inp.value || '').toLowerCase());
-
-    // ⚠️ 如果完全冇輸入，就唔計一次
     if (values.every(v => v === '')) return;
-
-    // 允許未填滿：當作一個 guess
     guess = values.join('');
   }
 
-  // ✅ 答啱
- // ✅ 答啱
-// ✅ 答啱
-// ✅ 答啱
-if (guess === correctWord) {
-  if (isTransitioning) return;
-  isTransitioning = true;
+  if (guess === correctWord) {
+    if (isTransitioning) return; isTransitioning = true;
+    const attemptsThisRound = wrongAttempts + 1;
+    attemptsLog[currentIndex] = { attempts: attemptsThisRound, revealed: false };
+    mistakeCount = 0; wrongAttempts = 0; showGreenTick();
+    const isLast = (currentIndex === setWords.length - 1);
+    setTimeout(() => {
+      hideGreenTick();
+      if (isLast) showFinish(); else nextWord();
+      isTransitioning = false;
+    }, 1200);
+    return;
+  }
 
-  const attemptsThisRound = wrongAttempts + 1;
-  attemptsLog[currentIndex] = { attempts: attemptsThisRound, revealed: false };
-
-  mistakeCount = 0;
-  wrongAttempts = 0;
-
-  // ✅ 顯示 tick（輸入字尾位置）
-  showGreenTick();
-
-  const isLast = (currentIndex === setWords.length - 1);
-  setTimeout(() => {
-    hideGreenTick();
-    if (isLast) {
-      showFinish();
-    } else {
-      nextWord();
-    }
-    isTransitioning = false;
-  }, 1200);
-
-  return;
-}
-
-  // ❌ 答錯
   document.getElementById("missSound").play();
-  mistakeCount++;
-  wrongAttempts++;
- // ✅ 記錄今次錯嘅輸入並顯示到右邊 box
+  mistakeCount++; wrongAttempts++; updateStickImage();
+  wrongGuesses.push(guess); renderAttemptsBox();
 
-updateStickImage();
-wrongGuesses.push(guess);
-renderAttemptsBox();
+  if (!useSplitInputs && wrongAttempts >= 1) {
+    useSplitInputs = true; resetInput(correctWord.length); return;
+  }
 
-
-  // 錯兩次後轉多格
- // 錯一次後即轉多格
-if (!useSplitInputs && wrongAttempts >= 1) {
-  useSplitInputs = true;
-  resetInput(correctWord.length);
-  return;
-}
-
-
-  // 多格時：鎖定啱位，清錯位
   if (useSplitInputs) {
     const inputs = document.querySelectorAll(".input-box");
     for (let i = 0; i < correctWord.length; i++) {
       if ((inputs[i].value || '').toLowerCase() === correctWord[i]) {
-        inputs[i].classList.add('locked');
-        inputs[i].value = correctWord[i];
-      } else {
-        inputs[i].value = '';
-        inputs[i].classList.remove('locked');
-      }
+        inputs[i].classList.add('locked'); inputs[i].value = correctWord[i];
+      } else { inputs[i].value = ''; inputs[i].classList.remove('locked'); }
     }
   }
 
-  // ❌ 到達錯誤上限
   if (mistakeCount >= 6) {
-    if (!useSplitInputs) {
-      useSplitInputs = true;
-      resetInput(correctWord.length);
-    }
-
-    // 記錄為 6 次錯誤並揭示
+    if (!useSplitInputs) { useSplitInputs = true; resetInput(correctWord.length); }
     attemptsLog[currentIndex] = { attempts: 6, revealed: true };
-
     const inputs = document.querySelectorAll(".input-box");
     for (let i = 0; i < correctWord.length; i++) {
-      inputs[i].value = correctWord[i];
-      inputs[i].style.color = '#FF0000';
-      inputs[i].classList.add('locked');
+      inputs[i].value = correctWord[i]; inputs[i].style.color = '#FF0000'; inputs[i].classList.add('locked');
     }
-
     document.getElementById("screamSound").play();
-
     const btn = document.getElementById("submitBtn");
-    btn.textContent = "Next";
-    btn.style.backgroundColor = "#FF0000";
-
+    btn.textContent = "Next"; btn.style.backgroundColor = "#FF0000";
     const isLast = (currentIndex === setWords.length - 1);
     btn.onclick = () => {
-      btn.textContent = "submit";
-      btn.style.backgroundColor = "#20B2AA";
-      btn.onclick = submitAnswer;
-
-      mistakeCount = 0;
-      wrongAttempts = 0;
-
-      if (isLast) {
-        showFinish();
-      } else {
-        nextWord();
-      }
+      btn.textContent = "submit"; btn.style.backgroundColor = "#20B2AA"; btn.onclick = submitAnswer;
+      mistakeCount = 0; wrongAttempts = 0;
+      if (isLast) showFinish(); else nextWord();
     };
     return;
   }
 
-  // 單格模式：每次錯就清空
-  if (!useSplitInputs) {
-    document.getElementById("inputBox").value = "";
-  }
+  if (!useSplitInputs) document.getElementById("inputBox").value = "";
 }
 
 function showHint(hintObj) {
   isHintOpen = true;
-
   const ov = document.getElementById('hintOverlay');
   const txt = document.getElementById('hintText');
   const closeBtn = document.getElementById('hintCloseBtn');
   const hintAudio = document.getElementById('hintAudio');
-
   if (!ov || !txt || !hintAudio || !closeBtn) return;
 
-  // 顯示文字（支援 <br> 換行）
   txt.innerHTML = (hintObj?.text || '').replace(/\n/g, '<br>');
 
-  // 指定音檔
   const w = wordSets[currentSet][currentIndex].word;
   hintAudio.src = hintObj?.audio || `audio/${w}_hints.mp3`;
-  hintAudio.currentTime = 0;
-  try { hintAudio.load?.(); } catch (e) {}
-
-  // 綁定關閉事件
+  hintAudio.currentTime = 0; try { hintAudio.load?.(); } catch (e) {}
   closeBtn.onclick = () => hideHint();
-
-  // 顯示提示層
   ov.style.display = 'flex';
 
-  // === 🔑 解決自動播放限制 ===
   const tryPlay = () => {
     if (!isHintOpen) return;
     hintAudio.play().catch(() => {
-      // 若被瀏覽器阻擋，就等玩家第一次互動再播
       const unlock = () => {
         if (!isHintOpen) return;
         hintAudio.play().finally(() => {
@@ -1480,138 +600,63 @@ function showHint(hintObj) {
       window.addEventListener('keydown', unlock, { once: true });
     });
   };
-
-  // 稍微延遲再嘗試播放，讓 overlay 先顯示完成
   if (hintPlayTimer) clearTimeout(hintPlayTimer);
   hintPlayTimer = setTimeout(tryPlay, 400);
 }
 
 function hideHint() {
   isHintOpen = false;
-
-  // 停止播放 + 清延遲
-  if (hintPlayTimer) clearTimeout(hintPlayTimer);
-  hintPlayTimer = null;
-
+  if (hintPlayTimer) clearTimeout(hintPlayTimer); hintPlayTimer = null;
   const hintAudio = document.getElementById('hintAudio');
-  if (hintAudio) {
-    try {
-      hintAudio.pause();
-      hintAudio.currentTime = 0;
-      hintAudio.src = ''; // 停止 hint 聲音
-    } catch (e) {}
-  }
-
-  const ov = document.getElementById('hintOverlay');
-  if (ov) ov.style.display = 'none';
+  if (hintAudio) { try { hintAudio.pause(); hintAudio.currentTime = 0; hintAudio.src = ''; } catch (e) {} }
+  const ov = document.getElementById('hintOverlay'); if (ov) ov.style.display = 'none';
 }
 
 function setBlankState() {
   const img = document.getElementById('wordImage');
   const blank = document.getElementById('blankImage');
-
-  if (img) {
-    img.style.display = 'none';        // 🚫 隱藏 <img>，唔會出破圖icon
-    img.src = '';                      // 清 src（可選）
-  }
+  if (img) { img.style.display = 'none'; img.src = ''; }
   if (blank) blank.style.display = 'block';
-
-  const input = document.getElementById("inputBox");
-  if (input) input.value = "";
-
-  const overlay = document.getElementById('finishOverlay');
-  if (overlay) overlay.style.display = 'none';
-  const summary = document.getElementById('attemptsSummary');
-  if (summary) summary.innerHTML = '';
-
-  const mainAudio = document.getElementById('audio');
-  try { if (mainAudio) { mainAudio.pause(); mainAudio.currentTime = 0; } } catch(e){}
-enableAllKeys();
-
+  const input = document.getElementById("inputBox"); if (input) input.value = "";
+  const overlay = document.getElementById('finishOverlay'); if (overlay) overlay.style.display = 'none';
+  const summary = document.getElementById('attemptsSummary'); if (summary) summary.innerHTML = '';
+  const mainAudio = document.getElementById('audio'); try { if (mainAudio) { mainAudio.pause(); mainAudio.currentTime = 0; } } catch(e){}
+  enableAllKeys();
 }
 
 function buildFinishSummary() {
   const setWords = wordSets[currentSet];
-  const box = document.getElementById('attemptsSummary');
-  if (!box) return;
-
+  const box = document.getElementById('attemptsSummary'); if (!box) return;
   let html = '<ul>';
   for (let i = 0; i < setWords.length; i++) {
-    const w = setWords[i].word;
-    const entry = attemptsLog[i];
-
+    const w = setWords[i].word; const entry = attemptsLog[i];
     let rightPart = '';
-    if (!entry) {
-      rightPart = '<span class="attempt">–</span>';               // 未作答
-    } else if (entry.revealed) {
-      rightPart = '<span class="cross-icon">❌</span>';            // 第6次都錯，被揭示
-    } else {
-      rightPart = `<span class="attempt">attempts: ${entry.attempts}</span>`; // 1–6 次內答啱
-    }
-
+    if (!entry) rightPart = '<span class="attempt">–</span>';
+    else if (entry.revealed) rightPart = '<span class="cross-icon">❌</span>';
+    else rightPart = `<span class="attempt">attempts: ${entry.attempts}</span>`;
     html += `<li><span class="word">${w}</span>${rightPart}</li>`;
   }
-  html += '</ul>';
-
-  box.innerHTML = html;
-}
-
-function escapeHtml(s='') {
-  return s.replace(/[&<>"']/g, m => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[m]));
+  html += '</ul>'; box.innerHTML = html;
 }
 
 function renderAttemptsBox() {
   const box = document.getElementById('attemptBox');
-  const list = document.getElementById('attemptList');
-  if (!box || !list) return;
-
-  if (wrongGuesses.length === 0) {
-    box.style.display = 'none';
-    list.innerHTML = '';
-    return;
-  }
-
+  const list = document.getElementById('attemptList'); if (!box || !list) return;
+  if (wrongGuesses.length === 0) { box.style.display = 'none'; list.innerHTML = ''; return; }
   box.style.display = 'block';
-  list.innerHTML = wrongGuesses
-    .slice(0, 6) // 最多顯示 6 個（3行×2列）
-    .map(g => `<li>${g}</li>`)
-    .join('');
+  list.innerHTML = wrongGuesses.slice(0, 6).map(g => `<li>${g}</li>`).join('');
 }
-
 
 function showFinish() {
-  buildFinishSummary();
-  document.getElementById("finishOverlay").style.display = "block";
-  gameOver = true;
-
-  // ✅ 播放勝利音效
+  buildFinishSummary(); document.getElementById("finishOverlay").style.display = "block"; gameOver = true;
   const win = document.getElementById("winSound");
-  if (win) {
-    try {
- win.volume = 0.3;
-      win.currentTime = 0;
-      win.play();
-    } catch (e) {
-      console.warn("Win sound play error:", e);
-    }
-  }
+  if (win) { try { win.volume = 0.3; win.currentTime = 0; win.play(); } catch(e){} }
 }
-
 
 function handleNextAfterReveal() {
   const btn = document.getElementById("submitBtn");
-
-  // 還原按鈕樣式同行為
-  btn.textContent = "submit";
-  btn.style.backgroundColor = "#20B2AA";
-  btn.onclick = submitAnswer;
-
-  // 重置錯誤計數，去下一題
-  mistakeCount = 0;
-  wrongAttempts = 0;
-  nextWord();
+  btn.textContent = "submit"; btn.style.backgroundColor = "#20B2AA"; btn.onclick = submitAnswer;
+  mistakeCount = 0; wrongAttempts = 0; nextWord();
 }
 
 function getScoreByAttempts(attempts) {
@@ -1623,342 +668,126 @@ function getScoreByAttempts(attempts) {
   return 50;
 }
 
-
-
-   function updateScore() {
+function updateScore() {
   const el = document.getElementById("scoreDisplay");
   if (el) el.textContent = `Score: ${score}`;
 }
 
-
 function updateStickImage(reset = false) {
-  const stick = document.getElementById("stick");
-  if (!stick) return;
-
-  if (reset) {
-    stick.src = "stick1.png";
-    stick.style.transform = "scale(1)"; // stick1 亦屬於 1–7
-    return;
-  }
-
+  const stick = document.getElementById("stick"); if (!stick) return;
+  if (reset) { stick.src = "stick1.png"; stick.style.transform = "scale(1)"; return; }
   const imageNumber = Math.min(9, mistakeCount + 1);
   stick.src = `stick${imageNumber}.png`;
-
 }
 
-  function nextWord() {
-hideHint();
-
-wrongGuesses = [];
-renderAttemptsBox();
-
+function nextWord() {
+  hideHint();
+  wrongGuesses = []; renderAttemptsBox();
   const setWords = wordSets[currentSet];
-
-  if (currentIndex >= setWords.length - 1) {
-    showFinish();      // 交俾統一收尾
-    return;
-  }
-
+  if (currentIndex >= setWords.length - 1) { showFinish(); return; }
   currentIndex++;
-
   const nextWordObj = setWords[currentIndex];
-
-  // 重置
-  mistakeCount = 0;
-  wrongAttempts = 0;
-  useSplitInputs = false;
-
-  resetInput(nextWordObj.word.length);
-  updateStickImage(true);
-  updateWord();
+  mistakeCount = 0; wrongAttempts = 0; useSplitInputs = false;
+  resetInput(nextWordObj.word.length); updateStickImage(true); updateWord();
 }
-
 
 function goNextAfterReveal() {
   awaitingNext = false;
-
-  // 還原按鈕樣式
   const btn = document.getElementById("submitBtn");
-  btn.textContent = "submit";
-  btn.style.backgroundColor = "#20B2AA";
-  btn.style.color = "#fff";
-
-  // 跳去下一題（你現有的 nextWord() 已經會 reset 錯誤、重畫輸入欄、reset stick、updateWord）
+  btn.textContent = "submit"; btn.style.backgroundColor = "#20B2AA"; btn.style.color = "#fff";
   nextWord();
 }
 
-
-  function resetGame() {
-wrongGuesses = [];
-renderAttemptsBox();
-
+function resetGame() {
+  wrongGuesses = []; renderAttemptsBox();
   document.getElementById("gameOverOverlay").style.display = "none";
-document.getElementById("finishOverlay").style.display = "none"; // <— 新增
-  mistakeCount = 0;
-  score = 0;
-  wrongAttempts = 0;
-  useSplitInputs = false;
-  gameOver = false;
-
-  updateScore();
-  updateStickImage(true);
-
+  document.getElementById("finishOverlay").style.display = "none";
+  mistakeCount = 0; score = 0; wrongAttempts = 0; useSplitInputs = false; gameOver = false;
+  updateScore(); updateStickImage(true);
   const currentWordObj = wordSets[currentSet][currentIndex];
-  
-
-
-(currentWordObj.word.length);  // ✅ 先 reset 輸入欄
-  updateWord(); // ✅ 再更新圖片及聲音
+  (currentWordObj.word.length);
+  updateWord();
 }
 
-
-function enableAllKeys() {
-  document.querySelectorAll(".keyboard button").forEach(btn => {
-    btn.disabled = false;
-    btn.classList.remove("key-disabled");
-  });
-}
-
-function applyDisabledLetters(letters=[]) {
+function enableAllKeys(){ document.querySelectorAll(".keyboard button").forEach(btn => { btn.disabled = false; btn.classList.remove("key-disabled"); }); }
+function applyDisabledLetters(letters=[]){
   const set = new Set(letters.map(l => l.toLowerCase()));
   document.querySelectorAll(".keyboard button").forEach(btn => {
     const ch = (btn.dataset.letter || "").toLowerCase();
-    // 退格鍵唔好禁
-    if (ch && ch !== "←" && set.has(ch)) {
-      btn.disabled = true;
-      btn.classList.add("key-disabled");
-    }
+    if (ch && ch !== "←" && set.has(ch)) { btn.disabled = true; btn.classList.add("key-disabled"); }
   });
 }
 
-function handlePlay(){
+function handlePlay() {
   if (!currentSet) switchSet(1);
-  firstPlayRequired = false;
-  playStarted = true;
-
-  const btn = document.getElementById('playBtn');
-  if (btn) btn.style.display = 'none';
-
-  const sp = document.getElementById('soundBtn');
-  if (sp) sp.disabled = false;
-
-  const obj = wordSets[currentSet]?.[currentIndex];
-  if (obj?.hint) showHint(obj.hint);
+  firstPlayRequired = false; playStarted = true;
+  const btn = document.getElementById('playBtn'); if (btn) btn.style.display = 'none';
+  const obj = wordSets[currentSet]?.[currentIndex]; if (obj?.hint) showHint(obj.hint);
 }
-
 
 function resetInput(length) {
   const container = document.getElementById("inputContainer");
-
-  // 取出 popup
-  const existingPopup = document.getElementById("scorePopup");
-  if (existingPopup) existingPopup.remove();
+  const existingPopup = document.getElementById("scorePopup"); if (existingPopup) existingPopup.remove();
   container.innerHTML = '';
 
-  const MAX_WIDTH = 564;      // 單格輸入的目標最大總闊度
-  const MIN_BOX = 48;         // 每細格最小闊度
-  const MAX_BOX = 120;        // 每細格最大闊度
-  const TARGET_GAP = 8;       // 期望 gap
-  const MIN_GAP = 2;          // 最少 gap
+  const MAX_WIDTH = 564, MIN_BOX = 48, MAX_BOX = 120, TARGET_GAP = 8, MIN_GAP = 2;
 
   if (!useSplitInputs) {
-    // —— 單格輸入 —— //
     const input = document.createElement("input");
-    input.id = "inputBox";
-    input.className = "input-box";
-    input.maxLength = length;
-    input.readOnly = true;
-
-    // 注意：.input-box 有 box-sizing:border-box，所以 width 包埋邊框
-    input.style.width = MAX_WIDTH + "px";
-    input.style.height = "160px";
-    input.style.fontSize = "100px";
-    input.style.textAlign = "center";
-    input.style.color = "#8B4513";
-    input.style.border = "2px solid #888";
-    input.style.backgroundColor = "rgba(255,255,255,0.5)";
-    input.style.margin = "0";                 // 避免額外寬度
-    input.style.boxSizing = "border-box";     // 再保險
+    input.id = "inputBox"; input.className = "input-box"; input.maxLength = length; input.readOnly = true;
+    input.style.width = MAX_WIDTH + "px"; input.style.height = "160px"; input.style.fontSize = "100px";
+    input.style.textAlign = "center"; input.style.color = "#8B4513"; input.style.border = "2px solid #888";
+    input.style.backgroundColor = "rgba(255,255,255,0.5)"; input.style.margin = "0"; input.style.boxSizing = "border-box";
     container.appendChild(input);
   } else {
-    // —— 分格輸入（自動收窄，包含 gap） —— //
     const group = document.createElement("div");
-    group.className = "split-input-group";
-    group.style.display = "inline-flex";
-    group.style.padding = "0";
-    group.style.boxSizing = "border-box";
-
-    // 先用期望 gap 計每格闊度
+    group.className = "split-input-group"; group.style.display = "inline-flex"; group.style.padding = "0"; group.style.boxSizing = "border-box";
     let gap = (length > 1) ? TARGET_GAP : 0;
     let per = Math.floor((MAX_WIDTH - gap * (length - 1)) / length);
-
-    // 限制每格闊度在 MIN/MAX 之間
     per = Math.max(MIN_BOX, Math.min(MAX_BOX, per));
-
-    // 以選定的 per 反推最終可用 gap，保證不超闊
     if (length > 1) {
       let maxGapThatFits = Math.floor((MAX_WIDTH - per * length) / (length - 1));
-      // 最少 2px，但不能大過期望 gap
       gap = Math.max(MIN_GAP, Math.min(TARGET_GAP, maxGapThatFits));
-
-      // 如果 maxGapThatFits < MIN_GAP，代表太迫，需再縮 per 才塞得落
-      if (maxGapThatFits < MIN_GAP) {
-        gap = MIN_GAP;
-        per = Math.floor((MAX_WIDTH - gap * (length - 1)) / length);
-        per = Math.max(24, per); // 再保險最低值
-      }
-    } else {
-      gap = 0;
-    }
-
+      if (maxGapThatFits < MIN_GAP) { gap = MIN_GAP; per = Math.floor((MAX_WIDTH - gap * (length - 1)) / length); per = Math.max(24, per); }
+    } else gap = 0;
     group.style.gap = gap + "px";
 
-    // 高度/字體跟闊度成比例
-    const boxWidth = per;
-    const boxHeight = Math.round(per);
-    const fontSize = Math.round(per * 0.8);
-
+    const boxWidth = per, boxHeight = Math.round(per), fontSize = Math.round(per * 0.8);
     for (let i = 0; i < length; i++) {
       const input = document.createElement("input");
-      input.type = "text";
-      input.maxLength = 1;
-      input.className = "input-box";
-      input.readOnly = true;
-
-      input.style.width = boxWidth + "px";
-      input.style.height = boxHeight + "px";
-      input.style.fontSize = fontSize + "px";
-      input.style.textAlign = "center";
-      input.style.border = "2px solid #888";
-      input.style.backgroundColor = "rgba(255,255,255,0.5)";
-      input.style.color = "#8B4513";
-
-      // 關鍵：避免多餘外距，並用 border-box 確保 width 是總寬
-      input.style.margin = "0";
-      input.style.boxSizing = "border-box";
-
+      input.type = "text"; input.maxLength = 1; input.className = "input-box"; input.readOnly = true;
+      input.style.width = boxWidth + "px"; input.style.height = boxHeight + "px"; input.style.fontSize = fontSize + "px";
+      input.style.textAlign = "center"; input.style.border = "2px solid #888"; input.style.backgroundColor = "rgba(255,255,255,0.5)";
+      input.style.color = "#8B4513"; input.style.margin = "0"; input.style.boxSizing = "border-box";
       group.appendChild(input);
     }
-
     container.appendChild(group);
   }
 
-  // —— 放返 popup —— //
   const popup = existingPopup || (() => {
     const p = document.createElement("div");
-    p.id = "scorePopup";
-    p.textContent = "+10";
-    p.style.position = "absolute";
-    p.style.right = "-100px";
-    p.style.top = "0";
-    p.style.fontSize = "60px";
-    p.style.color = "#8B4513";
-    p.style.opacity = "0";
-    p.style.pointerEvents = "none";
-    return p;
+    p.id = "scorePopup"; p.textContent = "+10"; p.style.position = "absolute"; p.style.right = "-100px"; p.style.top = "0";
+    p.style.fontSize = "60px"; p.style.color = "#8B4513"; p.style.opacity = "0"; p.style.pointerEvents = "none"; return p;
   })();
-
-  popup.classList.remove("showPopup");
-  popup.style.opacity = "0";
-  popup.textContent = "+10";
-  container.appendChild(popup);
+  popup.classList.remove("showPopup"); popup.style.opacity = "0"; popup.textContent = "+10"; container.appendChild(popup);
 }
 
+/* =================== 初始化 =================== */
+initGame();
+switchSet(2);
 
-    initGame();
-switchSet(1); 
-
-/* ========= 直向手機／橫向桌面：自動重排 ========= */
-/* ===== 手機直向／桌面橫向：自動重排（只搬 keyboard） ===== */
-let restorePoints = null;
-
-function isPortraitPhone(){
-  return window.innerWidth <= 820 && window.innerHeight > window.innerWidth;
+/* ====== ★ 固定版面縮放：整個 1000×720 盒子等比縮小，永不重排 ====== */
+function fitStage(){
+  const GAME_W = 1000, GAME_H = 720;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const scale = Math.min(1, vw / GAME_W, vh / GAME_H); // 不會放大超過 1
+  const stage = document.querySelector('.container');
+  if (stage) stage.style.transform = `scale(${scale})`;
 }
-
-function rememberOriginal(){
-  if (restorePoints) return;
-  const leftPanel   = document.querySelector('.left-panel');
-  const kb1         = document.getElementById('consonantKeys');
-  const kb2         = document.getElementById('vowelKeys');
-  const stickWrap   = document.getElementById('stick-container');
-  const attemptBox  = document.getElementById('attemptBox');
-
-  restorePoints = {
-    kb1Parent: kb1?.parentNode || null,
-    kb1Next:   kb1?.nextSibling || null,
-    kb2Parent: kb2?.parentNode || null,
-    kb2Next:   kb2?.nextSibling || null,
-    stickParent:  stickWrap?.parentNode || null,
-    stickNext:    stickWrap?.nextSibling || null,
-    attParent:    attemptBox?.parentNode || null,
-    attNext:      attemptBox?.nextSibling || null
-  };
-}
-
-function moveToMobile(){
-  const kbSlot   = document.getElementById('mobileKeyboardSlot');
-  const bottom   = document.getElementById('mobileBottomRow');
-  const kb1      = document.getElementById('consonantKeys');
-  const kb2      = document.getElementById('vowelKeys');
-  const stick    = document.getElementById('stick-container');
-  const attempts = document.getElementById('attemptBox');
-  if (!kbSlot || !bottom || !kb1 || !kb2 || !stick || !attempts) return;
-
-  // 只搬兩個 keyboard；label 在這裡重新建立，避免從左欄搬走
-  const mkLabel = (txt) => {
-    const d = document.createElement('div');
-    d.className = 'label';
-    d.textContent = txt;
-    return d;
-  };
-
-  kbSlot.replaceChildren(
-    mkLabel('Consonants'),
-    kb1,
-    mkLabel('Vowels'),
-    kb2
-  );
-
-  // 手機直向：每行 9 粒（再保險設一次）
-  kb1.style.width = '100%';
-  kb2.style.width = '100%';
-  kb1.style.display = 'grid';
-  kb2.style.display = 'grid';
-  kb1.style.gridTemplateColumns = 'repeat(9, 1fr)';
-  kb2.style.gridTemplateColumns = 'repeat(9, 1fr)';
-
-  // 最下：左 Stick、右 錯字
-  bottom.replaceChildren(stick, attempts);
-}
-
-function moveBackToDesktop(){
-  if (!restorePoints) return;
-  const {kb1Parent,kb1Next,kb2Parent,kb2Next,stickParent,stickNext,attParent,attNext} = restorePoints;
-  const kb1      = document.getElementById('consonantKeys');
-  const kb2      = document.getElementById('vowelKeys');
-  const stick    = document.getElementById('stick-container');
-  const attempts = document.getElementById('attemptBox');
-
-  if (kb1Parent)  kb1Parent.insertBefore(kb1,  kb1Next);
-  if (kb2Parent)  kb2Parent.insertBefore(kb2,  kb2Next);
-  if (stickParent)stickParent.insertBefore(stick, stickNext);
-  if (attParent)  attParent.insertBefore(attempts, attNext);
-}
-
-function relayout(){
-  rememberOriginal();
-  if (isPortraitPhone()){
-    moveToMobile();
-  }else{
-    moveBackToDesktop();
-  }
-}
-
-const runRelayout = () => requestAnimationFrame(relayout);
-window.addEventListener('load', runRelayout);
-window.addEventListener('resize', runRelayout);
-window.addEventListener('orientationchange', runRelayout);
-</script>
+window.addEventListener('load', fitStage);
+window.addEventListener('resize', fitStage);
+window.addEventListener('orientationchange', fitStage);
+  </script>
 </body>
 </html>

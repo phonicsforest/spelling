@@ -252,6 +252,35 @@
     0 0 14px rgba(0,0,0,.85),
     0 0 24px rgba(0,0,0,.7);
 }
+/* ===== Rotate hint (mobile portrait) ===== */
+#rotateHint{
+  position: fixed;
+  inset: 0;
+  display: none;                /* 需要時以 JS 顯示 */
+  align-items: center;
+  justify-content: center;
+  z-index: 4000;                /* 高過晒 */
+  pointer-events: none;         /* 讓下方仍可點 */
+}
+#rotateHint .msg{
+  width: 90vw;                  /* ≈手機畫面長度的 90% */
+  text-align: center;
+  color: #fff;
+  font-weight: 900;
+  line-height: 1.15;
+  /* 大字：隨螢幕縮放 */
+  font-size: clamp(22px, 9vw, 56px);
+  /* 黑色模糊陰影 */
+  text-shadow:
+    0 0 8px rgba(0,0,0,.75),
+    0 0 18px rgba(0,0,0,.55);
+  /* 輕微閃動吸睛 */
+  animation: rotateHintFlash 1.1s ease-in-out infinite;
+}
+@keyframes rotateHintFlash{
+  0%,100% { opacity: .95; transform: scale(1); }
+  50%     { opacity: .7;  transform: scale(1.02); }
+}
 
   </style>
 </head>
@@ -329,6 +358,10 @@
     </div>
     <audio id="hintAudio"></audio>
   </div>
+<!-- Rotate/Hints overlay -->
+<div id="rotateHint">
+  <div class="msg">please turn your phone sideway to play</div>
+</div>
 
   <script>
 /* =================== 你的遊戲資料與邏輯（原樣保留） =================== */
@@ -751,6 +784,24 @@ function handlePlay() {
   const btn = document.getElementById('playBtn'); if (btn) btn.style.display = 'none';
   const obj = wordSets[currentSet]?.[currentIndex]; if (obj?.hint) showHint(obj.hint);
 }
+function isPortraitPhone(){
+  const isMobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  return isMobileUA && window.matchMedia('(orientation: portrait)').matches && window.innerWidth <= 820;
+}
+
+function showRotateHint(){
+  const el = document.getElementById('rotateHint');
+  if (!el) return;
+  el.style.display = 'flex';
+  setTimeout(() => { el.style.display = 'none'; }, 4000); // 4 秒後自動消失
+}
+
+// 初始 & 方向改變時檢查
+window.addEventListener('load', () => { if (isPortraitPhone()) showRotateHint(); });
+window.addEventListener('orientationchange', () => { if (isPortraitPhone()) showRotateHint(); });
+window.addEventListener('resize', () => { /* 由直→橫時毋須再顯示；只在直向時顯示 */
+  if (isPortraitPhone()) showRotateHint();
+});
 
 function resetInput(length) {
   const container = document.getElementById("inputContainer");

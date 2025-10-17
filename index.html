@@ -232,26 +232,6 @@
     }
     #playBtn:hover { transform: scale(1.05); filter: brightness(1.1); }
 /* --- Mobile tip overlay --- */
-#mobileTip{
-  position: fixed;
-  inset: 0;
-  display: none;                 /* 需要時用 JS 顯示 */
-  align-items: center;
-  justify-content: center;
-  z-index: 3000;                 /* 高過其他元素 */
-  pointer-events: none;          /* 唔阻擋點擊 */
-}
-#mobileTip span{
-  color: #fff;
-  font-size: 22px;
-  padding: 10px 14px;
-  text-align: center;
-  /* 黑色 blur shadow */
-  text-shadow:
-    0 0 6px rgba(0,0,0,.95),
-    0 0 14px rgba(0,0,0,.85),
-    0 0 24px rgba(0,0,0,.7);
-}
 /* ===== Rotate hint (mobile portrait) ===== */
 #rotateHint{
   position: fixed;
@@ -332,9 +312,6 @@
         </div>
       </div>
 <!-- Mobile portrait tip -->
-<div id="mobileTip">
-  <span>Please turn your phone sideways to play.</span>
-</div>
 
 
       <audio id="audio" src=""></audio>
@@ -789,12 +766,31 @@ function isPortraitPhone(){
   return isMobileUA && window.matchMedia('(orientation: portrait)').matches && window.innerWidth <= 820;
 }
 
-function showRotateHint(){
+// ===== Rotate hint: show ONCE per tab when mobile + portrait =====
+const ROTATE_HINT_KEY = 'rotateHintShown_v1';
+
+function isMobilePortrait() {
+  const isMobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+  return isMobileUA && isPortrait && window.innerWidth <= 820;
+}
+
+function showRotateHintOnce() {
+  if (sessionStorage.getItem(ROTATE_HINT_KEY)) return;   // 已顯示過
+  if (!isMobilePortrait()) return;                       // 唔係手機直向就唔顯示
+
   const el = document.getElementById('rotateHint');
   if (!el) return;
+
   el.style.display = 'flex';
-  setTimeout(() => { el.style.display = 'none'; }, 4000); // 4 秒後自動消失
+  sessionStorage.setItem(ROTATE_HINT_KEY, '1');          // 記錄已顯示
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
+
+// 只在「首次載入」判斷一次
+window.addEventListener('load', showRotateHintOnce);
+
+// （可選）如你非常想在 reload 後重新顯示，把上面的 sessionStorage 換做 localStorage 即可。
 
 // 初始 & 方向改變時檢查
 window.addEventListener('load', () => { if (isPortraitPhone()) showRotateHint(); });
@@ -863,37 +859,6 @@ function fitStage(){
   const stage = document.querySelector('.container');
   if (stage) stage.style.transform = `scale(${scale})`;
 }
-// ===== Mobile portrait tip =====
-function isMobileUA(){
-  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-}
-function showMobileTip(){
-  const el = document.getElementById('mobileTip');
-  if (!el) return;
-  el.style.display = 'flex';
-  clearTimeout(showMobileTip._t);
-  showMobileTip._t = setTimeout(() => {
-    el.style.display = 'none';
-  }, 4000); // 4 秒後消失
-}
-function maybeShowMobileTip(){
-  if (!isMobileUA()) return;
-  const isPortrait = window.matchMedia('(orientation: portrait)').matches;
-  if (isPortrait) showMobileTip();
-}
-
-// 初次載入／轉向時檢查
-window.addEventListener('load', () => {
-  fitStage();
-  maybeShowMobileTip();
-});
-window.addEventListener('orientationchange', () => {
-  // 少少延遲等瀏覽器更新方向狀態
-  setTimeout(() => {
-    fitStage();
-    maybeShowMobileTip();
-  }, 120);
-});
 
 window.addEventListener('load', fitStage);
 window.addEventListener('resize', fitStage);

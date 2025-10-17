@@ -337,7 +337,7 @@
   </div>
 <!-- Rotate/Hints overlay -->
 <div id="rotateHint">
-  <div class="msg">please turn your phone sideway to play</div>
+  <div class="msg">please turn your phone sideways to play</div>
 </div>
 
   <script>
@@ -849,6 +849,22 @@ function resetInput(length) {
 /* =================== 初始化 =================== */
 initGame();
 switchSet(2);
+// 一次過設定所有音效音量（0~1）
+function setSfxVolumes() {
+  const click   = document.getElementById('clickSound');
+  const miss    = document.getElementById('missSound');
+  const win     = document.getElementById('winSound');
+  const scream  = document.getElementById('screamSound');
+
+  if (click)  click.volume  = 0.20;  // 點鍵聲
+  if (miss)   miss.volume   = 0.20;  // 刮聲
+  if (win)    win.volume    = 0.30;  // 勝利聲
+  if (scream) scream.volume = 0.20;  // 尖叫聲
+}
+
+// DOM ready 後呼叫一次
+window.addEventListener('load', setSfxVolumes);
+
 
 /* ====== ★ 固定版面縮放：整個 1000×720 盒子等比縮小，永不重排 ====== */
 function fitStage(){

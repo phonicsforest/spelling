@@ -259,33 +259,40 @@
       0%,100% { opacity: .95; transform: scale(1); }
       50%     { opacity: .7;  transform: scale(1.02); }
     }
-/* --- 修復 Play 按鈕紅圈樣式 --- */
-#playBtn {
-  position: absolute;
-  right: -60px;
-  top: 20px;
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ff9f1c, #ff3b30);
-  color: #fff;
-  font-size: 26px;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.15s ease, filter 0.2s ease;
-  z-index: 2000;
-  box-shadow: 0 0 12px rgba(255, 59, 48, 0.5);
-}
 
-#playBtn:hover {
-  transform: scale(1.05);
-  filter: brightness(1.1);
-}
+    /* --- 修復 Play 按鈕紅圈樣式 --- */
+    #playBtn {
+      position: absolute;
+      right: -60px;
+      top: 20px;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff9f1c, #ff3b30);
+      color: #fff;
+      font-size: 26px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease, filter 0.2s ease;
+      z-index: 2000;
+      box-shadow: 0 0 12px rgba(255, 59, 48, 0.5);
+    }
+    #playBtn:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
 
+    /* ✅ 防止 split 輸入格文字在不同裝置被截斷／溢出 */
+    .split-input-group .input-box {
+      padding: 0;
+      overflow: hidden;
+      vertical-align: middle;
+      -webkit-text-size-adjust: 100%;
+    }
   </style>
 </head>
 <body>
@@ -879,6 +886,10 @@ function resetInput(length) {
     input.style.width = MAX_WIDTH + "px"; input.style.height = "160px"; input.style.fontSize = "100px";
     input.style.textAlign = "center"; input.style.color = "#8B4513"; input.style.border = "2px solid #888";
     input.style.backgroundColor = "rgba(255,255,255,0.5)"; input.style.margin = "0"; input.style.boxSizing = "border-box";
+    /* 可選：讓大輸入框更穩定 */
+    input.style.lineHeight = "160px";
+    input.style.padding = "0";
+    input.style.overflow = "hidden";
     container.appendChild(input);
   } else {
     const group = document.createElement("div");
@@ -893,13 +904,29 @@ function resetInput(length) {
     } else gap = 0;
     group.style.gap = gap + "px";
 
-    const boxWidth = per, boxHeight = Math.round(per), fontSize = Math.round(per * 0.8);
+    const boxWidth  = per;
+    const boxHeight = Math.round(per);
+    const contentH  = Math.max(10, boxHeight - 4);           // 扣 2px 上下邊框
+    const fontSize  = Math.floor(contentH * 0.74);           // 收斂比例，避免溢出
+
     for (let i = 0; i < length; i++) {
       const input = document.createElement("input");
       input.type = "text"; input.maxLength = 1; input.className = "input-box"; input.readOnly = true;
-      input.style.width = boxWidth + "px"; input.style.height = boxHeight + "px"; input.style.fontSize = fontSize + "px";
-      input.style.textAlign = "center"; input.style.border = "2px solid #888"; input.style.backgroundColor = "rgba(255,255,255,0.5)";
-      input.style.color = "#8B4513"; input.style.margin = "0"; input.style.boxSizing = "border-box";
+
+      input.style.width        = boxWidth + "px";
+      input.style.height       = boxHeight + "px";
+      input.style.fontSize     = fontSize + "px";
+      input.style.lineHeight   = contentH + "px";            // 垂直置中且不溢出
+
+      input.style.textAlign    = "center";
+      input.style.border       = "2px solid #888";
+      input.style.backgroundColor = "rgba(255,255,255,0.5)";
+      input.style.color        = "#8B4513";
+      input.style.margin       = "0";
+      input.style.boxSizing    = "border-box";
+      input.style.padding      = "0";
+      input.style.overflow     = "hidden";
+
       group.appendChild(input);
     }
     container.appendChild(group);

@@ -92,6 +92,45 @@
       align-items: center;
       margin-top: 74px;
     }
+/* ===== Top bar: Set 選單 + Go ===== */
+.topbar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+margin-bottom: 10px;
+}
+#topSetSelect {
+  margin-top: 13px; /* ↓ 可微調 */
+}
+#goBtn {
+  margin-top: 4px; /* ↓ 令兩個更齊 */
+}
+
+.ui-ctrl{
+  height: 38px;
+  line-height: 38px;
+  font-size: 16px;
+  padding: 0 10px;
+  color:#8B4513;
+  background:#fff;
+  border:1px solid #cfcfcf;
+  border-radius: 0;               /* ❗非圓角 */
+}
+#topSetSelect.ui-ctrl{ width: 160px; }
+#goBtn{
+  min-width: 64px;
+  padding: 0 14px;
+  background:#8B4513;             /* 啡底白字 */
+  color:#fff;
+  border: none;
+  border-radius: 0;               /* ❗非圓角 */
+  cursor:pointer;
+  height:38px;
+}
+#goBtn:hover{ background:#5f3418; box-shadow:0 0 6px rgba(95,52,24,.35); }
+
+/* 讓整條 topbar 與畫面其他元素對齊 */
+.header-row{ display:flex; flex-direction:column; }
 
     .image-container { width: 570px; height: 390px; position: relative; }
     .word-hint{
@@ -243,6 +282,10 @@
       z-index: 4000;
       pointer-events: none;
     }
+#wordImage.placeholder {
+  background: #fff;
+}
+
     #rotateHint .msg{
       width: 90vw;
       text-align: center;
@@ -260,31 +303,6 @@
       50%     { opacity: .7;  transform: scale(1.02); }
     }
 
-    /* --- 修復 Play 按鈕紅圈樣式 --- */
-    #playBtn {
-      position: absolute;
-      right: -60px;
-      top: 20px;
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #ff9f1c, #ff3b30);
-      color: #fff;
-      font-size: 26px;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.15s ease, filter 0.2s ease;
-      z-index: 2000;
-      box-shadow: 0 0 12px rgba(255, 59, 48, 0.5);
-    }
-    #playBtn:hover {
-      transform: scale(1.05);
-      filter: brightness(1.1);
-    }
 
     /* ✅ 防止 split 輸入格文字在不同裝置被截斷／溢出 */
     .split-input-group .input-box {
@@ -299,16 +317,25 @@
   <div class="stage-outer">
     <div class="container">
       <div class="game-row">
-        <div class="left-panel">
-          <div class="label-row" style="position:relative; display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-            <div id="lessonLabel">Lesson 7-1</div>
-            <button id="playBtn" onclick="handlePlay()">Play</button>
-          </div>
-          <div class="label">Consonants</div>
-          <div class="keyboard" id="consonantKeys"></div>
-          <div class="label">Vowels</div>
-          <div class="keyboard" id="vowelKeys"></div>
-        </div>
+<div class="left-panel">
+  <div class="header-row">
+    <div class="topbar">
+      <select id="topSetSelect" class="ui-ctrl">
+        <!-- 1–25 -->
+        <option value="" selected disabled>Select Set</option>
+        <script>
+          document.write([...Array(25)].map((_,i)=>`<option value="${i+1}">Set ${i+1}</option>`).join(''));
+        </script>
+      </select>
+      <button id="goBtn" onclick="handleGo()">Go</button>
+    </div>
+  </div>
+
+  <div class="label">Consonants</div>
+  <div class="keyboard" id="consonantKeys"></div>
+  <div class="label">Vowels</div>
+  <div class="keyboard" id="vowelKeys"></div>
+</div>
 
         <div class="image-input-wrapper">
           <div class="image-container">
@@ -720,6 +747,22 @@ function showHint(hintObj) {
   hintPlayTimer = setTimeout(tryPlay, 400);
 }
 
+function handleGo(){
+  // 讀取選中的 set（若未選就默認 1）
+  const sel = document.getElementById('topSetSelect');
+  const chosen = parseInt(sel?.value || '1', 10);
+
+  switchSet(chosen);     // 載入該 set（第 1 題）
+  playStarted = true;    // 立即開始
+  firstPlayRequired = false;
+
+  // 如果首題有教學提示就打開；同時顯示一次鍵盤提示
+  const obj = wordSets[currentSet]?.[currentIndex];
+  if (obj?.hint) showHint(obj.hint);
+  mountKbdHint();
+}
+
+
 function hideHint() {
   isHintOpen = false;
   if (hintPlayTimer) clearTimeout(hintPlayTimer); hintPlayTimer = null;
@@ -731,8 +774,15 @@ function hideHint() {
 function setBlankState() {
   const img = document.getElementById('wordImage');
   const blank = document.getElementById('blankImage');
-  if (img) { img.style.display = 'none'; img.src = ''; }
-  if (blank) blank.style.display = 'block';
+if (img) {
+  // 使用 1x1 白色 PNG，避免出現破圖 icon
+  img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/axwQX0AAAAASUVORK5CYII=';
+
+  img.style.display = 'block';
+  img.classList.add('placeholder');
+  img.style.background = '#fff';
+}
+if (blank) blank.style.display = 'none';
   const input = document.getElementById("inputBox"); if (input) input.value = "";
   const overlay = document.getElementById('finishOverlay'); if (overlay) overlay.style.display = 'none';
   const summary = document.getElementById('attemptsSummary'); if (summary) summary.innerHTML = '';
@@ -766,7 +816,7 @@ function renderAttemptsBox() {
 function showFinish() {
   buildFinishSummary(); document.getElementById("finishOverlay").style.display = "block"; gameOver = true;
   const win = document.getElementById("winSound");
-  if (win) { try { win.volume = 0.3; win.currentTime = 0; win.play(); } catch(e){} }
+  if (win) { try { win.volume = 0.08; win.currentTime = 0; win.play(); } catch(e){} }
 }
 
 function handleNextAfterReveal() {
@@ -846,14 +896,6 @@ function applyDisabledLetters(letters = []) {
   });
 }
 
-/* =================== 控制 =================== */
-function handlePlay() {
-  if (!currentSet) switchSet(1);
-  firstPlayRequired = false; playStarted = true;
-  const btn = document.getElementById('playBtn'); if (btn) btn.style.display = 'none';
-  const obj = wordSets[currentSet]?.[currentIndex]; if (obj?.hint) showHint(obj.hint);
-  mountKbdHint();
-}
 
 /* ====== Rotate hint：只在手機直向第一次提示 ====== */
 const ROTATE_HINT_KEY = 'rotateHintShown_v1';
@@ -990,10 +1032,10 @@ function setSfxVolumes() {
   const win     = document.getElementById('winSound');
   const scream  = document.getElementById('screamSound');
 
-  if (click)  click.volume  = 0.20;
-  if (miss)   miss.volume   = 0.20;
-  if (win)    win.volume    = 0.30;
-  if (scream) scream.volume = 0.20;
+  if (click)  click.volume  = 0.10;
+  if (miss)   miss.volume   = 0.08;
+  if (win)    win.volume    = 0.05;
+  if (scream) scream.volume = 0.08;
 }
 window.addEventListener('load', setSfxVolumes);
 
@@ -1012,7 +1054,6 @@ window.addEventListener('orientationchange', fitStage);
 
 /* ====== 啟動 ====== */
 initGame();
-switchSet(1);
   </script>
 </body>
 </html>

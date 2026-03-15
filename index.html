@@ -399,59 +399,59 @@ margin-bottom: 10px;
   <script>
 /* =================== 資料 =================== */
 const wordSets = {
-  1:[{word:"cub",hint:{text:"如果/k/ 在前是 c ,/k/ 在後是 k <br>因為國王好老了在後面慢慢行, 貓就在前面跑<br> e.g.  cook, crook",audio:"audio/cub_hints.mp3"}},{word:"gun"},{word:"mop"},{word:"sim"},{word:"ted"},{word:"rag"},{word:"cot"}],
-  2:[{word:"silk",disabled:["c"],hint:{text:"一個音的字, 如果聽到/l/音,<br> 是 l 不是 o , 因為 o 是讀/o/<br>e.g. milk, sell",audio:"audio/silk_hints.mp3"}},{word:"loft"},{word:"vent"},{word:"melt"},{word:"gasp"},{word:"busk"}],
-  3:[{word:"drop",hint:{text:"d r 讀快些好像 j <br>j 比較清和簡單, d r 聽上來有些變化的<br>e.g. jam 同 dram ",audio:"audio/drop_hints.mp3"}},{word:"trim",hint:{text:"t r 讀快些拼出來好像 ch<br>ch 比較清和簡單, t r 聽上來有些變化的<br>e.g. train 同 chain ",audio:"audio/trim_hints.mp3"}},{word:"flip"},{word:"drug"},{word:"blog"},{word:"trap"},{word:"crab"},{word:"brim"}],
-  4:[{word:"truck",hint:{text:"a e i o u 後有 /k/音, 國王帶貓跟小朋友玩,<br>所以是 ck, 小朋友後盡量多些人<br>e.g. lock, duck ",audio:"audio/truck_hints.mp3"}},{word:"dock"},{word:"lack"},{word:"yuck"},{word:"flock"},{word:"slack"}],
-  5:[{word:"mesh"},{word:"shock"},{word:"slosh"},{word:"shack"}],
-  6:[{word:"mulch"},{word:"pitch"},{word:"etch"},{word:"chock"}],
-  7:[{word:"cloth",disabled:["f"]},{word:"thrum",disabled:["f"]},{word:"broth",disabled:["f"]}],
-  8:[{word:"scab",hint:{text:"sg, sb, sd 不會在一起<br>要用 sc, sp, st 蛇嚇到人的故事取代<br>e.g stop, spin, scan ",audio:"audio/scab_hints.mp3"}},{word:"stench"},{word:"stitch"},{word:"span"},{word:"scotch"},{word:"splash"}],
-  9:[{word:"wig",disabled:["e"]},{word:"fix"},{word:"slick"},{word:"fig",disabled:["e"]},{word:"critic",hint:{text:"之前講過aeiou後如有/k/音是ck<br>但如果該字有兩個音節以上,尾音是ic 就不用加k<br>e.g music, comic ",audio:"audio/critic_hints.mp3"}},{word:"public"}],
-  10:[{word:"chime",disabled:["g"]},{word:"wipe"},{word:"clade",disabled:["i"]},{word:"spine",disabled:["g"]},{word:"gripe"},{word:"gape",disabled:["i"]},{word:"steve",disabled:["a","i"]},{word:"mule",disabled:["w"]},{word:"dose",disabled:["a","w"]},{word:"fuse",disabled:["w"]},{word:"phase",disabled:["f","i"]}],
-  11:[{word:"think",disabled:["f"]},{word:"bring"},{word:"cling"},{word:"stink"},{word:"shrink"},{word:"drink"}],
-  12:[{word:"quake",disabled:["i"],hint:{text:"如果聽到/kw/ 音是qu, 沒有kw的",audio:"audio/quake_hints.mp3"}},{word:"quench"},{word:"quick"},{word:"quote",disabled:["w","a"]},{word:"quite",disabled:["g"]}],
-  13:[{word:"sheaf",disabled:["i"]},{word:"flea",disabled:["i"]},{word:"thief",disabled:["a"]},{word:"sweat",hint:{text:"如果聽到/e/ 音, 除e外還有ea",audio:"audio/sweat_hints.mp3"}},{word:"death"},{word:"preen",disabled:["a","i"]},{word:"shield",disabled:["a"]},{word:"chief",disabled:["a"]},{word:"flue",disabled:["o","w"]}],
-  14:[{word:"birch",disabled:["e","u"]},{word:"derv",disabled:["i","u"]},{word:"stir",disabled:["e","u"]},{word:"thorn",disabled:["a"]},{word:"scorn",disabled:["a"]},{word:"mirth",disabled:["e","u"]},{word:"shirk",disabled:["e","u"]},{word:"quirk",disabled:["e"]}],
-  15:[{word:"stew"},{word:"spew"},{word:"fume",disabled:["w"]}],
-  16:[{word:"soy",hint:{text:"跳高故事ai,ei,oi,ay,ey,oy 因為Ivanman不喜歡在最尾<br>放在中間是ai,ei,oi  放最尾是ay,ey,oy<br>e.g. toy,soil,play,rain",audio:"audio/soy_hints.mp3"}},{word:"dray",disabled:["e"]},{word:"coil"},{word:"troy"},{word:"hoist"},{word:"spray",disabled:["e"]},{word:"quail",disabled:["e"]},{word:"stain",disabled:["e"]}],
-  17:[{word:"launch",disabled:["o","w"]},{word:"prawn",disabled:["u","l","o"]},{word:"stalk",disabled:["o","w","u"]},{word:"spawn",disabled:["l","u","o"]},{word:"chalk",disabled:["o","w","u"]}],
-  18:[{word:"coach",disabled:["w"]},{word:"scold",disabled:["w","a"]},{word:"shoal",disabled:["w"]},{word:"blind",disabled:["g"]},{word:"child",disabled:["g"]}],
-  19:[{word:"scoot",disabled:["u"]},{word:"drown",disabled:["u"]},{word:"crow",disabled:["a"]},{word:"broom",disabled:["u"]},{word:"shoot",disabled:["u"]}],
-  20:[{word:"tawny",disabled:["e","r","l","u"]},{word:"foamy",disabled:["e","w"]},{word:"faintly",disabled:["e"]},{word:"shonky",disabled:["e"]},{word:"twirly",disabled:["e","u"]}],
-  21:[{word:"kerb",disabled:["i","u"],hint:{text:"之前話/k/音在前是c,在後是k<br>但如果第2個英文字母係i,y,e, c會變咗/s/<br>所以前面的/k/音就要用k<br>e.g. kiss , kettle",audio:"audio/kerb_hints.mp3"}},{word:"king"},{word:"kid"},{word:"kick"},{word:"keen",disabled:["a","i"]},{word:"kite",disabled:["g"]}],
-  22:[{word:"victor",disabled:["e","a"]},{word:"orca",disabled:["w","l","u"]},{word:"mower",disabled:["a"]},{word:"dower",disabled:["u","a"]},{word:"fauna",disabled:["o","l","w","e"]},{word:"shiver",disabled:["a","o"]}],
-  23:[{word:"portion",disabled:["s","a"]},{word:"fiction",disabled:["s"]},{word:"incursion",disabled:["e","t"]},{word:"caution",disabled:["w","r","l","s"]}],
-  24:[{word:"shadow",disabled:["l"]},{word:"indigo",disabled:["l","w"]},{word:"bronco",disabled:["l","w"]},{word:"widow",disabled:["l"]},{word:"jungle",disabled:["o","a"]},{word:"doodle",disabled:["u","w"]},{word:"beadle",disabled:["i","w","o"]},{word:"burgle",disabled:["i","o"]},{word:"travel",disabled:["o"]},{word:"coastal",disabled:["e","w"]},{word:"kernel",disabled:["a","i","u"]}],
-  25:[{word:"hospitality"},{word:"calendar",disabled:["u","o"]},{word:"adventure",disabled:["o"]},{word:"disaster",disabled:["o"]},{word:"tradition",disabled:["s","e","u"]},{word:"phenomenon",disabled:["u","f","a"]},{word:"philosophy",disabled:["u","a","e","f"]}]
+  1:[{word:"cab",hint:{text:"如果/k/ 在前是 c ,/k/ 在後是 k <br>因為國王好老了在後面慢慢行, 貓就在前面跑<br> e.g.  cook, crook",audio:"audio/cub_hints.mp3"}},{word:"den"},{word:"top"},{word:"sip"},{word:"fog"},{word:"tub"},{word:"cop"}],
+  2:[{word:"belt",disabled:["o"],hint:{text:"一個音的字, 如果聽到/l/音,<br> 是 l 不是 o , 因為 o 是讀/o/<br>e.g. milk, sell",audio:"audio/silk_hints.mp3"}},{word:"camp"},{word:"task"},{word:"mast"},{word:"tank"},{word:"hilt"}],
+  3:[{word:"drab",hint:{text:"d r 讀快些好像 j <br>j 比較清和簡單, d r 聽上來有些變化的<br>e.g. jam 同 dram ",audio:"audio/drop_hints.mp3"}},{word:"tram",hint:{text:"t r 讀快些拼出來好像 ch<br>ch 比較清和簡單, t r 聽上來有些變化的<br>e.g. train 同 chain ",audio:"audio/trim_hints.mp3"}},{word:"flam"},{word:"drip"},{word:"blot"},{word:"trod"},{word:"crop"},{word:"bred"}],
+  4:[{word:"sack",hint:{text:"a e i o u 後有 /k/音, 國王帶貓跟小朋友玩,<br>所以是 ck, 小朋友後盡量多些人<br>e.g. lock, duck ",audio:"audio/truck_hints.mp3"}},{word:"peck"},{word:"lock"},{word:"tuck"},{word:"crack"},{word:"block"}],
+  5:[{word:"shin",disabled:["e"]},{word:"shed"},{word:"lash"},{word:"dish"},{word:"shuck"}],
+  6:[{word:"patch"},{word:"notch"},{word:"check"},{word:"punch"},{word:"chunk"}],
+  7:[{word:"path",disabled:["f"]},{word:"thin",disabled:["f"]},{word:"moth",disabled:["f"]}],
+  8:[{word:"scud",hint:{text:"sg, sb, sd 不會在一起<br>要用 sc, sp, st 蛇嚇到人的故事取代<br>e.g stop, spin, scan ",audio:"audio/scab_hints.mp3"}},{word:"stab"},{word:"stock"},{word:"spent"},{word:"spun"},{word:"stash"}],
+  9:[{word:"lick"},{word:"mix"},{word:"jig",disabled:["e"]},{word:"tick"},{word:"magic",hint:{text:"之前講過aeiou後如有/k/音是ck<br>但如果該字有兩個音節以上,尾音是ic 就不用加k<br>e.g music, comic ",audio:"audio/critic_hints.mp3"}},{word:"topic"}],
+  10:[{word:"tape",disabled:["i"]},{word:"bike"},{word:"lime"},{word:"stone",disabled:["a"]},{word:"cute"},{word:"shape",disabled:["i"]},{word:"chase",disabled:["i"]},{word:"sprite"},{word:"scope",disabled:["a","w"]},{word:"state",disabled:["i"]},{word:"phrase",disabled:["f","i","c"]}],
+  11:[{word:"sling"},{word:"sting"},{word:"spring"},{word:"blink"},{word:"sink"}],
+  12:[{word:"quid",disabled:["k","c"],hint:{text:"如果聽到/kw/ 音是qu, 沒有kw的",audio:"audio/quake_hints.mp3"}},{word:"quack"},{word:"quest"},{word:"squid",disabled:["k","c"]}],
+  13:[{word:"peach",disabled:["i"]},{word:"field",disabled:["a"]},{word:"greet",disabled:["a","i"]},{word:"bread",hint:{text:"如果聽到/e/ 音, 除e外還有ea",audio:"audio/sweat_hints.mp3"}},{word:"lead",disabled:["i"]},{word:"sheet",disabled:["a","i"]},{word:"reach",disabled:["i"]},{word:"clue",disabled:["o"]},{word:"true",disabled:["o"]}],
+  14:[{word:"chirp",disabled:["e","u"]},{word:"shirt",disabled:["e","u"]},{word:"perch",disabled:["i","u"]},{word:"burst",disabled:["i","e"]},{word:"curl",disabled:["i","e"]},{word:"spur",disabled:["e","i"]}],
+  15:[{word:"pew",disabled:["u"]},{word:"cube",disabled:["w"]},{word:"tube",disabled:["w"]},{word:"few",disabled:["u"]}],
+  16:[{word:"point",hint:{text:"跳高故事ai,ei,oi,ay,ey,oy 因為Ivanman不喜歡在最尾<br>放在中間是ai,ei,oi  放最尾是ay,ey,oy<br>e.g. toy,soil,play,rain",audio:"audio/soy_hints.mp3"}},{word:"choy"},{word:"aim",disabled:["e"]},{word:"hail",disabled:["e"]},{word:"chain",disabled:["e"]},{word:"spay"},{word:"spain",disabled:["e"]},{word:"chay"},{word:"holiday",disabled:["e"]}],
+  17:[{word:"gaunt",disabled:["l","w","r"]},{word:"shaw",disabled:["u","l","r"]},{word:"corn",disabled:["a"]},{word:"torch",disabled:["a"]},{word:"scorch",disabled:["a"]},{word:"stall",disabled:["r","w","u"]}],
+  18:[{word:"coast",disabled:["w"]},{word:"gold",disabled:["w","a"]},{word:"toast",disabled:["w"]},{word:"find",disabled:["g"]},{word:"wild",disabled:["g"]}],
+  19:[{word:"spoon",disabled:["u"]},{word:"stool",disabled:["u"]},{word:"glow",disabled:["a"]},{word:"snow",disabled:["a"]},{word:"smoke",disabled:["a","w"]},{word:"slope",disabled:["w","a"]}],
+  20:[{word:"noisy",disabled:["c","e"]},{word:"dirty",disabled:["e","u"]},{word:"study",disabled:["e"]},{word:"windy",disabled:["e"]},{word:"easy",disabled:["i","c"]}],
+  21:[{word:"sketch",hint:{text:"之前話/k/音在前是c,在後是k<br>但如果第2個英文字母係i,y,e, c會變咗/s/<br>所以前面的/k/音就要用k<br>e.g. kiss , kettle",audio:"audio/kerb_hints.mp3"}},{word:"skirt",disabled:["u","e"]},{word:"kept"},{word:"skin",disabled:["e"]},{word:"skimp",disabled:["e"]}],
+  22:[{word:"mentor",disabled:["a"]},{word:"tailor",disabled:["e"]},{word:"silver",disabled:["f","a","o"]},{word:"number",disabled:["o","a"]},{word:"drama",disabled:["o","e"]},{word:"ultra",disabled:["e","o"]},{word:"editor",disabled:["a"]}],
+  23:[{word:"version",disabled:["u","t","f"]},{word:"pension",disabled:["t"]},{word:"vision",disabled:["f","t"]},{word:"invention",disabled:["f","s"]}],
+  24:[{word:"mango",disabled:["l","w"]},{word:"window",disabled:["l","a"]},{word:"simple",disabled:["o","a"]},{word:"purple",disabled:["i","a","o"]},{word:"handle",disabled:["o"]},{word:"candle",disabled:["o"]},{word:"camel",disabled:["o"]},{word:"towel",disabled:["u","a"]},{word:"panel",disabled:["o"]},{word:"capital",disabled:["e","o"]}],
+  25:[{word:"memory",disabled:["a","u"]},{word:"history",disabled:["u","a","e"]},{word:"important",disabled:["e","u","l","w"]},{word:"ability",disabled:["u","e","o"]},{word:"incredible",disabled:["o","a"]}]
 };
 
 const meanings = {
-  cub:"幼獸",gun:"槍",mop:"拖把",sim:"模擬",ted:"熊",rag:"抹布",cot:"小床",
-  silk:"絲綢",loft:"閣樓",vent:"通風口",melt:"融化",gasp:"倒抽一口氣",busk:"街頭表演",
-  drop:"掉落",trim:"修剪",flip:"翻轉",drug:"藥物",blog:"部落格",trap:"陷阱",crab:"螃蟹",brim:"邊緣",
-  truck:"貨車",dock:"碼頭",lack:"缺乏",yuck:"噁心",flock:"群",slack:"鬆弛",
-  mesh:"網狀物",shock:"震驚",slosh:"濺起",shack:"簡陋小屋",
-  mulch:"覆蓋物",pitch:"球場",etch:"蝕刻",chock:"塞住",
-  cloth:"布料",thrum:"低沉嗡聲",broth:"肉湯",
-  scab:"結痂",stench:"惡臭",stitch:"縫合",span:"跨度",scotch:"蘇格蘭的",splash:"濺起",
-  wig:"假髮",fix:"修理",slick:"圓滑的",fig:"無花果",critic:"評論家",public:"公眾/公共的",
-  chime:"風鈴",wipe:"擦拭",clade:"演化支",spine:"脊柱",gripe:"抱怨",gape:"目瞪口呆",steve:"人名",mule:"騾子",dose:"劑量",fuse:"保險絲",phase:"階段",
-  think:"思考",bring:"帶來",cling:"緊貼/依附",stink:"發臭",shrink:"收縮",drink:"喝/飲料",
-  quake:"地震",quench:"解渴",quick:"快速",quote:"引述",quite:"相當",
-  sheaf:"一束",flea:"跳蚤",thief:"小偷",sweat:"汗水",death:"死亡",preen:"整理羽毛",shield:"盾牌",chief:"首領",flue:"煙道",
-  birch:"樺木",derv:"柴油",stir:"攪拌",thorn:"荊棘",scorn:"鄙視",mirth:"歡笑",shirk:"逃避",quirk:"怪癖",
-  stew:"燉菜",spew:"噴出",fume:"冒煙",
-  soy:"大豆",dray:"運貨平板車",coil:"線圈/盤繞",troy:"特洛伊",hoist:"吊起",spray:"噴霧",quail:"鵪鶉",stain:"污漬",
-  launch:"發射",prawn:"明蝦",stalk:"莖",spawn:"產卵",chalk:"粉筆",
-  coach:"長途巴士",scold:"責罵",shoal:"淺灘",blind:"失明",child:"孩子",
-  scoot:"疾走",drown:"溺水",crow:"烏鴉",broom:"掃帚",shoot:"射擊",
-  tawny:"黃褐色的",foamy:"起泡的",faintly:"微弱地",shonky:"粗劣的",twirly:"旋轉的",
-  kerb:"路邊石",king:"國王",kid:"小孩",kick:"踢",keen:"熱切",kite:"風箏",
-  victor:"勝利者",orca:"虎鯨",mower:"割草機",dower:"嫁妝",fauna:"動物群",shiver:"發抖",
-  portion:"部分",fiction:"小說",incursion:"入侵",caution:"警示",
-  shadow:"影子",indigo:"靛藍色",bronco:"野馬",widow:"寡婦",jungle:"叢林",doodle:"塗鴉",beadle:"教堂司事",burgle:"入室行竊",travel:"旅行",coastal:"沿海的",kernel:"穀粒",
-  hospitality:"好客",calendar:"日曆",adventure:"冒險",disaster:"災難",tradition:"傳統",phenomenon:"現象",philosophy:"哲學"
+  cab:"的士", den:"獸穴", top:"頂部", sip:"小口喝", fog:"霧", tub:"浴盆", cop:"警察",
+  belt:"腰帶", camp:"營地", task:"任務", mast:"桅杆", tank:"坦克", hilt:"刀柄",
+  drab:"暗淡的", tram:"電車", flam:"胡話", drip:"滴下", blot:"污點", trod:"踩", crop:"作物", bred:"培育",
+  sack:"袋子", peck:"啄", lock:"鎖", tuck:"塞入", crack:"裂縫", block:"街區",
+  shin:"小腿", shed:"棚子", lash:"鞭打", dish:"碟子", shuck:"剝殼",
+  patch:"補丁", notch:"缺口", check:"檢查", punch:"打孔", chunk:"塊",
+  path:"小路", thin:"薄的", moth:"飛蛾",
+  scud:"疾飛", stab:"刺", stock:"存貨", spent:"花費", spun:"旋轉", stash:"藏起來",
+  lick:"舔", mix:"混合", jig:"快速舞", tick:"壁蝨", magic:"魔法", topic:"主題",
+  tape:"膠帶", bike:"單車", lime:"青檸", stone:"石頭", cute:"可愛", shape:"形狀", chase:"追逐", sprite:"小精靈", scope:"範圍", state:"州", phrase:"短語",
+  sling:"吊帶", sting:"刺痛", spring:"春天", blink:"眨眼", sink:"下沉",
+  quid:"一鎊", quack:"鴨叫", quest:"尋找", squid:"魷魚",
+  peach:"桃", field:"田野", greet:"問候", bread:"麵包", lead:"帶領", sheet:"床單", reach:"到達", clue:"線索", true:"真實",
+  chirp:"啁啾", shirt:"襯衫", perch:"棲息", burst:"爆裂", curl:"捲曲", spur:"刺激",
+  pew:"教堂長椅", cube:"立方體", tube:"管子", few:"少量",
+  point:"點", choy:"菜", aim:"目標", hail:"冰雹", chain:"鏈條", spay:"給動物絕育", spain:"西班牙", chay:"佛手瓜", holiday:"假期",
+  gaunt:"瘦削的", shaw:"小樹林", corn:"玉米", torch:"火炬", scorch:"燒焦", stall:"攤位",
+  coast:"海岸", gold:"金", toast:"吐司", find:"找到", wild:"野生的",
+  spoon:"湯匙", stool:"凳子", glow:"發光", snow:"雪", smoke:"煙", slope:"斜坡",
+  noisy:"吵鬧的", dirty:"骯髒的", study:"學習", windy:"多風的", easy:"容易的",
+  sketch:"素描", skirt:"裙子", kept:"保持", skin:"皮膚", skimp:"節省", 
+  mentor:"導師", tailor:"裁縫", silver:"銀", number:"數字", drama:"戲劇", ultra:"極端", editor:"編輯",
+  version:"版本", pension:"退休金", vision:"視覺", invention:"發明",
+  mango:"芒果", window:"窗戶", simple:"簡單", purple:"紫色", handle:"把手", candle:"蠟燭", camel:"駱駝", towel:"毛巾", panel:"面板", capital:"首都",
+  memory:"記憶", history:"歷史", important:"重要", ability:"能力", incredible:"難以置信"
 };
 
 /* =================== 狀態 =================== */
@@ -630,7 +630,7 @@ function playAudio() {
   const word = wordSets[currentSet]?.[currentIndex]?.word; if (!word) return;
   const audioEl = document.getElementById("audio"); if (!audioEl) return;
   try{
-    audioEl.src = `audio/${word}${nextAudioIndex}.mp3`;
+    audioEl.src = `audio_homework/${word}${nextAudioIndex}.mp3`;
     audioEl.currentTime = 0; audioEl.play();
     nextAudioIndex = (nextAudioIndex === 1) ? 2 : 1;
   }catch(e){}

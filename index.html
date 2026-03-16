@@ -407,7 +407,7 @@ const wordSets = {
   6:[{word:"patch"},{word:"notch"},{word:"check"},{word:"punch"},{word:"chunk"}],
   7:[{word:"path",disabled:["f"]},{word:"thin",disabled:["f"]},{word:"moth",disabled:["f"]}],
   8:[{word:"scud",hint:{text:"sg, sb, sd 不會在一起<br>要用 sc, sp, st 蛇嚇到人的故事取代<br>e.g stop, spin, scan ",audio:"audio/scab_hints.mp3"}},{word:"stab"},{word:"stock"},{word:"spent"},{word:"spun"},{word:"stash"}],
-  9:[{word:"lick"},{word:"mix"},{word:"jig",disabled:["e"]},{word:"tick"},{word:"magic",hint:{text:"之前講過aeiou後如有/k/音是ck<br>但如果該字有兩個音節以上,尾音是ic 就不用加k<br>e.g music, comic ",audio:"audio/critic_hints.mp3"}},{word:"topic"}],
+  9:[{word:"lick"},{word:"mix"},{word:"jig",disabled:["e"]},{word:"tick"},{word:"comic",hint:{text:"之前講過aeiou後如有/k/音是ck<br>但如果該字有兩個音節以上,尾音是ic 就不用加k<br>e.g music, comic ",audio:"audio/critic_hints.mp3"}},{word:"topic"}],
   10:[{word:"tape",disabled:["i"]},{word:"bike"},{word:"lime"},{word:"stone",disabled:["a"]},{word:"cute"},{word:"shape",disabled:["i"]},{word:"chase",disabled:["i"]},{word:"sprite"},{word:"scope",disabled:["a","w"]},{word:"state",disabled:["i"]},{word:"phrase",disabled:["f","i","c"]}],
   11:[{word:"sling"},{word:"sting"},{word:"spring"},{word:"blink"},{word:"sink"}],
   12:[{word:"quid",disabled:["k","c"],hint:{text:"如果聽到/kw/ 音是qu, 沒有kw的",audio:"audio/quake_hints.mp3"}},{word:"quack"},{word:"quest"},{word:"squid",disabled:["k","c"]}],
@@ -426,6 +426,9 @@ const wordSets = {
   25:[{word:"memory",disabled:["a","u"]},{word:"history",disabled:["u","a","e"]},{word:"important",disabled:["e","u","l","w"]},{word:"ability",disabled:["u","e","o"]},{word:"incredible",disabled:["o","a"]}]
 };
 
+26:[{word:"culture"},{word:"mixture"},{word:"feature",disabled:["i"]},{word:"gesture",disabled:["j"]},{word:"moisture"}],
+
+
 const meanings = {
   cab:"的士", den:"獸穴", top:"頂部", sip:"小口喝", fog:"霧", tub:"浴盆", cop:"警察",
   belt:"腰帶", camp:"營地", task:"任務", mast:"桅杆", tank:"坦克", hilt:"刀柄",
@@ -435,9 +438,9 @@ const meanings = {
   patch:"補丁", notch:"缺口", check:"支票", punch:"打孔", chunk:"塊",
   path:"小路", thin:"薄的", moth:"飛蛾",
   scud:"疾飛", stab:"刺", stock:"存貨", spent:"花費", spun:"旋轉", stash:"藏起來",
-  lick:"舔", mix:"混合", jig:"快速舞", tick:"壁蝨", magic:"魔法", topic:"主題",
+  lick:"舔", mix:"混合", jig:"快速舞", tick:"壁蝨", comic:"漫畫", topic:"主題",
   tape:"膠帶", bike:"單車", lime:"青檸", stone:"石頭", cute:"可愛", shape:"形狀", chase:"追逐", sprite:"雪碧", scope:"範圍", state:"州", phrase:"短小段",
-  sling:"吊帶", sting:"刺痛", spring:"春天", blink:"眨眼", sink:"下沉",
+  sling:"吊帶", sting:"刺痛", spring:"春天", blink:"眨眼", sink:"水槽",
   quid:"一鎊", quack:"鴨叫", quest:"尋找", squid:"魷魚",
   peach:"桃", field:"田野", greet:"問候", bread:"麵包", lead:"帶領", sheet:"床單", reach:"到達", clue:"線索", true:"真實",
   chirp:"啁啾", shirt:"襯衫", perch:"棲息", burst:"爆裂", curl:"捲曲", spur:"靴刺",
@@ -451,7 +454,9 @@ const meanings = {
   tailor:"裁縫", silver:"銀", number:"數字", drama:"戲劇", ultra:"極端", editor:"編輯",
   version:"版本", pension:"退休金", vision:"視覺", invention:"發明",
   mango:"芒果", window:"窗戶", simple:"簡單", purple:"紫色", handle:"把手", candle:"蠟燭", camel:"駱駝", towel:"毛巾", panel:"面板", capital:"首都",
-  memory:"記憶", history:"歷史", important:"重要", ability:"能力", incredible:"難以置信"
+  memory:"記憶", history:"歷史", important:"重要", ability:"能力", incredible:"難以置信",
+  culture:"文化",mixture:"混合物",feature:"特徵",gesture:"手勢",moisture:"水分"
+
 };
 
 /* =================== 狀態 =================== */

@@ -324,7 +324,7 @@ margin-bottom: 10px;
         <!-- 1–25 -->
         <option value="" selected disabled>Select Set</option>
         <script>
-          document.write([...Array(25)].map((_,i)=>`<option value="${i+1}">Set ${i+1}</option>`).join(''));
+          document.write([...Array(26)].map((_,i)=>`<option value="${i+1}">Set ${i+1}</option>`).join(''));
         </script>
       </select>
       <button id="goBtn" onclick="handleGo()">Go</button>
@@ -424,7 +424,6 @@ const wordSets = {
   23:[{word:"version",disabled:["u","t","f"]},{word:"pension",disabled:["t"]},{word:"vision",disabled:["f","t"]},{word:"invention",disabled:["f","s"]}],
   24:[{word:"mango",disabled:["l","w"]},{word:"window",disabled:["l","a"]},{word:"simple",disabled:["o","a"]},{word:"purple",disabled:["i","a","o"]},{word:"handle",disabled:["o"]},{word:"candle",disabled:["o"]},{word:"camel",disabled:["o"]},{word:"towel",disabled:["u","a"]},{word:"panel",disabled:["o"]},{word:"capital",disabled:["e","o"]}],
   25:[{word:"memory",disabled:["a","u"]},{word:"history",disabled:["u","a","e"]},{word:"important",disabled:["e","u","l","w"]},{word:"ability",disabled:["u","e","o"]},{word:"incredible",disabled:["o","a"]}],
-
 
 26:[{word:"culture"},{word:"mixture"},{word:"feature",disabled:["i"]},{word:"gesture",disabled:["j"]},{word:"moisture"}]
 
